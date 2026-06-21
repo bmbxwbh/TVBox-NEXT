@@ -11,7 +11,9 @@ android {
         targetSdkVersion 28
 
         python {
-            buildPython("D:/Programs/Python/Python38/python.exe")
+            // CI 环境使用系统 Python,本地开发使用指定路径
+            def pythonExe = System.getenv("CI_PYTHON") ?: "D:/Programs/Python/Python38/python.exe"
+            buildPython(pythonExe)
             pip {
                 install "lxml"
                 install "ujson"

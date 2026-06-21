@@ -7,19 +7,10 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
-    inputs:
-      release_type:
-        description: '发布类型'
-        required: true
-        default: 'debug'
-        type: choice
-        options:
-          - debug
-          - release
 
 jobs:
   build:
-    name: Build APK
+    name: Build Release APK
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -37,6 +28,11 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
@@ -45,17 +41,31 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Debug APK
-        if: github.event_name == 'push' || github.event.inputs.release_type == 'debug' || github.event.inputs.release_type == ''
+      - name: Create local.properties
         run: |
-          ./gradlew assembleNormalDebug --build-cache --parallel --daemon --warning-mode summary || \
-          ./gradlew assembleDebug --build-cache --parallel --daemon --warning-mode summary
+          echo "sdk.dir=${ANDROID_HOME}" > local.properties
+        env:
+          Python_ROOT_DIR: ${{ env.pythonLocation }}
+
+      - name: Generate debug keystore for release signing
+        run: |
+          keytool -genkeypair -v -storetype PKCS12 \
+            -keystore app/keystore.jks \
+            -storepass android -keypass android \
+            -alias androiddebugkey \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
 
       - name: Build Release APK
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_type == 'release'
         run: |
-          ./gradlew assembleNormalRelease --build-cache --parallel --daemon --warning-mode summary || \
-          ./gradlew assembleRelease --build-cache --parallel --daemon --warning-mode summary
+          ./gradlew assembleNormalRelease --build-cache --parallel --daemon --warning-mode summary 2>&1 | tee build.log
+          exit ${PIPESTATUS[0]}
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/app/keystore.jks
+          KEYSTORE_PASSWORD: android
+          KEY_ALIAS: androiddebugkey
+          KEY_PASSWORD: android
+          CI_PYTHON: ${{ env.pythonLocation }}/python
 
       - name: Prepare APK
         id: prepare
@@ -65,12 +75,11 @@ jobs:
             cp "$f" ${{ github.workspace }}/apk/
           done
           ls -la ${{ github.workspace }}/apk/
-          echo "apk_dir=${{ github.workspace }}/apk" >> $GITHUB_OUTPUT
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: TVBox-NEXT-APK
+          name: TVBox-NEXT-Release
           path: ${{ github.workspace }}/apk/*.apk
           retention-days: 30
           compression-level: 0
@@ -90,15 +99,15 @@ jobs:
           tag_name: ${{ steps.tag.outputs.tag }}
           name: TVBox-NEXT ${{ steps.tag.outputs.tag }}
           body: |
-            ## TVBox-NEXT 自动构建
+            ## TVBox-NEXT 自动构建(正式版)
 
             **构建时间**: ${{ steps.tag.outputs.tag }}
             **Commit**: ${{ github.sha }}
             **分支**: ${{ github.ref_name }}
 
             ### 下载说明
-            - `TVBox_debug-java-arm64.apk` - 64位 ARM 设备(主流手机/电视盒子)
-            - `TVBox_debug-java-armeabi.apk` - 32位 ARM 设备(老旧设备)
+            - `TVBox_release-java-arm64.apk` - 64位 ARM 设备(主流手机/电视盒子)
+            - `TVBox_release-java-armeabi.apk` - 32位 ARM 设备(老旧设备)
 
             ### 功能
             - Netflix 风格 UI 改造(TV + 手机端)
@@ -120,8 +129,8 @@ jobs:
             **Commit**: ${{ github.sha }}
 
             ### 下载说明
-            - `TVBox_debug-java-arm64.apk` - 64位 ARM 设备(主流手机/电视盒子)
-            - `TVBox_debug-java-armeabi.apk` - 32位 ARM 设备(老旧设备)
+            - `TVBox_release-java-arm64.apk` - 64位 ARM 设备(主流手机/电视盒子)
+            - `TVBox_release-java-armeabi.apk` - 32位 ARM 设备(老旧设备)
           files: ${{ github.workspace }}/apk/*.apk
           draft: false
           prerelease: false
