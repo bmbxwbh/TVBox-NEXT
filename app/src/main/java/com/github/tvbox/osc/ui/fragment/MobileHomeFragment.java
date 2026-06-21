@@ -65,12 +65,15 @@ public class MobileHomeFragment extends Fragment {
     private MobileGridAdapter hotAdapter;
     private View emptyState;
     private TextView tvEmptyHint;
+    // TVBOX-NEXT 优化#5: 加载状态进度条
+    private View loadingBar;
 
     // 站点推荐数据(由 MobileHomeActivity 通过 sortResult 设置)
-    private static List<Movie.Video> homeSourceRec = null;
+    // TVBOX-NEXT 优化#2: 改为实例变量,避免 static 持有数据导致内存泄漏
+    private List<Movie.Video> homeSourceRec = null;
 
-    public static void setHomeSourceRec(List<Movie.Video> rec) {
-        homeSourceRec = rec;
+    public void setHomeSourceRec(List<Movie.Video> rec) {
+        this.homeSourceRec = rec;
     }
 
     @Nullable
@@ -92,6 +95,8 @@ public class MobileHomeFragment extends Fragment {
         rowsContainer = view.findViewById(R.id.rowsContainer);
         emptyState = view.findViewById(R.id.emptyState);
         tvEmptyHint = view.findViewById(R.id.tvEmptyHint);
+        // TVBOX-NEXT 优化#5: 初始化加载状态进度条
+        loadingBar = view.findViewById(R.id.loadingBar);
 
         // "去设置"按钮
         View btnGoSetting = view.findViewById(R.id.btnGoSetting);
@@ -141,8 +146,10 @@ public class MobileHomeFragment extends Fragment {
                         homeSourceRec = absXml.videoList;
                         // 站点推荐模式:刷新列表
                         if (Hawk.get(HawkConfig.HOME_REC, 0) == 1 && hotAdapter != null) {
+                            hideLoading();
                             hideEmptyState();
-                            hotAdapter.setNewData(homeSourceRec);
+                            // TVBOX-NEXT 优化#6: 使用 DiffUtil 增量更新
+                            hotAdapter.setDiffNewData(homeSourceRec);
                             updateHero(homeSourceRec);
                         }
                     } else if (Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
@@ -224,8 +231,12 @@ public class MobileHomeFragment extends Fragment {
         if (Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
             // 站点推荐模式
             if (homeSourceRec != null) {
+                hideLoading();
                 hotAdapter.setNewData(homeSourceRec);
                 updateHero(homeSourceRec);
+            } else {
+                // TVBOX-NEXT 优化#5: 等待数据加载,显示加载状态
+                showLoading();
             }
             return;
         } else if (Hawk.get(HawkConfig.HOME_REC, 0) == 2) {
@@ -234,6 +245,8 @@ public class MobileHomeFragment extends Fragment {
             return;
         }
         // 豆瓣热播模式
+        // TVBOX-NEXT 优化#5: 显示加载状态
+        showLoading();
         try {
             Calendar cal = Calendar.getInstance();
             int year = cal.get(Calendar.YEAR);
@@ -248,6 +261,7 @@ public class MobileHomeFragment extends Fragment {
                     if (hots.isEmpty()) {
                         showEmptyState("豆瓣数据为空,请尝试切换为站点推荐");
                     } else {
+                        hideLoading();
                         hideEmptyState();
                         hotAdapter.setNewData(hots);
                         updateHero(hots);
@@ -271,6 +285,7 @@ public class MobileHomeFragment extends Fragment {
                                 if (hots.isEmpty()) {
                                     showEmptyState("豆瓣数据为空,请在设置中切换为站点推荐");
                                 } else {
+                                    hideLoading();
                                     hideEmptyState();
                                     hotAdapter.setNewData(hots);
                                     updateHero(hots);
@@ -319,6 +334,7 @@ public class MobileHomeFragment extends Fragment {
         if (vodList.isEmpty()) {
             showEmptyState("暂无观看历史");
         } else {
+            hideLoading();
             hideEmptyState();
             hotAdapter.setNewData(vodList);
             updateHero(vodList);
@@ -369,6 +385,7 @@ public class MobileHomeFragment extends Fragment {
      */
     private void showEmptyState(String hint) {
         if (emptyState == null) return;
+        hideLoading();
         emptyState.setVisibility(View.VISIBLE);
         if (hint != null && tvEmptyHint != null) {
             tvEmptyHint.setText(hint);
@@ -384,6 +401,22 @@ public class MobileHomeFragment extends Fragment {
         }
     }
 
+    // TVBOX-NEXT 优化#5: 加载状态显示/隐藏
+    private void showLoading() {
+        if (loadingBar != null) {
+            loadingBar.setVisibility(View.VISIBLE);
+        }
+        if (emptyState != null) {
+            emptyState.setVisibility(View.GONE);
+        }
+    }
+
+    private void hideLoading() {
+        if (loadingBar != null) {
+            loadingBar.setVisibility(View.GONE);
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -395,9 +428,17 @@ public class MobileHomeFragment extends Fragment {
         // 站点推荐模式:如果 homeSourceRec 已更新,刷新列表
         if (Hawk.get(HawkConfig.HOME_REC, 0) == 1 && homeSourceRec != null
                 && hotAdapter.getData().isEmpty()) {
-            hotAdapter.setNewData(homeSourceRec);
+            // TVBOX-NEXT 优化#6: 使用 DiffUtil 增量更新
+            hotAdapter.setDiffNewData(homeSourceRec);
             updateHero(homeSourceRec);
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // TVBOX-NEXT 优化#2: 清理引用,避免内存泄漏
+        homeSourceRec = null;
     }
 
     /**

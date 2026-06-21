@@ -3,6 +3,9 @@ package com.github.tvbox.osc.ui.adapter;
 import android.text.TextUtils;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DiffUtil;
+
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.github.tvbox.osc.R;
@@ -12,6 +15,7 @@ import com.github.tvbox.osc.util.anim.SpringAnimHelper;
 import com.github.tvbox.osc.util.anim.TransitionHelper;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * TVBOX-NEXT: 手机端竖版海报卡片适配器
@@ -62,5 +66,61 @@ public class MobileGridAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
             }
             return false;
         });
+    }
+
+    // TVBOX-NEXT 优化#6: 使用 DiffUtil 增量更新,避免全量刷新导致的闪烁
+    private static final DiffUtil.ItemCallback<Movie.Video> DIFF_CALLBACK = new DiffUtil.ItemCallback<Movie.Video>() {
+        @Override
+        public boolean areItemsTheSame(Movie.Video oldItem, Movie.Video newItem) {
+            return oldItem.id != null && oldItem.id.equals(newItem.id)
+                    && oldItem.sourceKey != null && oldItem.sourceKey.equals(newItem.sourceKey);
+        }
+
+        @Override
+        public boolean areContentsTheSame(Movie.Video oldItem, Movie.Video newItem) {
+            return TextUtils.equals(oldItem.name, newItem.name)
+                    && TextUtils.equals(oldItem.pic, newItem.pic)
+                    && TextUtils.equals(oldItem.note, newItem.note)
+                    && oldItem.year == newItem.year;
+        }
+    };
+
+    /**
+     * 使用 DiffUtil 增量更新数据
+     * 首次加载或数据量较大时回退到 setNewData
+     */
+    public void setDiffNewData(@Nullable List<Movie.Video> newData) {
+        if (newData == null) {
+            setNewData(null);
+            return;
+        }
+        List<Movie.Video> oldData = getData();
+        if (oldData == null || oldData.isEmpty() || newData.size() == 0) {
+            setNewData(newData);
+            return;
+        }
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return oldData.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return newData.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                return DIFF_CALLBACK.areItemsTheSame(oldData.get(oldItemPosition), newData.get(newItemPosition));
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                return DIFF_CALLBACK.areContentsTheSame(oldData.get(oldItemPosition), newData.get(newItemPosition));
+            }
+        });
+        setNewData(newData);
+        result.dispatchUpdatesTo(this);
     }
 }

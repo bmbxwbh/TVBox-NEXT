@@ -147,6 +147,18 @@
             android:orientation="vertical"
             android:paddingTop="8dp" />
 
+        <!-- TVBOX-NEXT 优化#5: 加载状态进度条 -->
+        <ProgressBar
+            android:id="@+id/loadingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="60dp"
+            android:layout_marginBottom="60dp"
+            android:visibility="gone"
+            android:indeterminateTint="@color/color_141414"
+            android:indeterminateTintMode="src_in" />
+
         <!-- 空状态提示(数据为空时显示) -->
         <LinearLayout
             android:id="@+id/emptyState"

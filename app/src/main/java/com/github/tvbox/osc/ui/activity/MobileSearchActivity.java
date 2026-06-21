@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.catvod.crawler.JsLoader;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
-import com.github.tvbox.osc.base.BaseActivity;
+import com.github.tvbox.osc.base.BaseMobileActivity;
 import com.github.tvbox.osc.bean.AbsXml;
 import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.bean.SourceBean;
@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 搜索栏 + 热门标签 + 历史 + 结果网格
  * 复用原版 SearchActivity 的搜索逻辑(SourceViewModel 多源并发搜索)
  */
-public class MobileSearchActivity extends BaseActivity {
+public class MobileSearchActivity extends BaseMobileActivity {
 
     private EditText etSearch;
     private View layoutHotTags;
@@ -71,6 +71,18 @@ public class MobileSearchActivity extends BaseActivity {
     private AtomicInteger allRunCount = new AtomicInteger(0);
     private HashMap<String, String> mCheckSources = null;
     private static ArrayList<String> hots = new ArrayList<>();
+
+    // TVBOX-NEXT 优化#7: 搜索防抖,使用 BaseMobileActivity 的 mMobileHandler,避免快速连续搜索
+    private final Runnable searchDebounceRunnable = new Runnable() {
+        @Override
+        public void run() {
+            String keyword = etSearch.getText().toString().trim();
+            if (!TextUtils.isEmpty(keyword)) {
+                search(keyword);
+            }
+        }
+    };
+    private static final long SEARCH_DEBOUNCE_DELAY = 600;
 
     @Override
     protected int getLayoutResID() {
@@ -139,6 +151,8 @@ public class MobileSearchActivity extends BaseActivity {
                         refreshSearchHistory(keyword);
                         jumpActivity(FastSearchActivity.class, bundle);
                     } else {
+                        // TVBOX-NEXT 优化#7: 使用防抖触发搜索,避免快速连续搜索
+                        mMobileHandler.removeCallbacks(searchDebounceRunnable);
                         search(keyword);
                     }
                 } else {
@@ -425,6 +439,7 @@ public class MobileSearchActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // TVBOX-NEXT 优化#11: Handler 清理由 BaseMobileActivity 统一处理
         cancel();
         try {
             if (sourceViewModel != null) {

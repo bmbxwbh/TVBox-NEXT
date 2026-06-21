@@ -51,6 +51,8 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            // TVBOX-NEXT 优化#8: 启用资源压缩,移除未使用的资源以减小 APK 体积
+            shrinkResources true
             // 签名配置:优先使用环境变量,无则使用 debug 签名
             if (System.getenv("KEYSTORE_FILE") != null) {
                 signingConfig signingConfigs.release

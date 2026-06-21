@@ -321,3 +321,28 @@
 -keepclassmembers,allowobfuscation class * { @org.simpleframework.xml.Element <fields>; }
 -keepclassmembers,allowobfuscation class * { @org.simpleframework.xml.Attribute <fields>; }
 -keepclassmembers,allowobfuscation class * { @org.simpleframework.xml.ElementList <fields>; }
+
+# TVBOX-NEXT 优化#14: 手机端相关 ProGuard 规则补充
+
+# Glide Generated API (GlideModule 使用注解处理器生成代码)
+-keep class com.bumptech.glide.GeneratedAppGlideModule { *; }
+-keep class com.aminography.redirectglide.** { *; }
+-keep class com.bumptech.glide.load.model.GlideUrl { *; }
+-keep class com.bumptech.glide.load.model.LazyHeaders { *; }
+
+# 手机端 Activity/Fragment/Adapter (避免反射调用失败)
+-keep class com.github.tvbox.osc.base.BaseMobileActivity { *; }
+-keep class com.github.tvbox.osc.ui.activity.Mobile* { *; }
+-keep class com.github.tvbox.osc.ui.fragment.Mobile* { *; }
+-keep class com.github.tvbox.osc.ui.adapter.Mobile* { *; }
+
+# 动画工具类 (反射调用)
+-keep class com.github.tvbox.osc.util.anim.** { *; }
+
+# ViewPager2 相关
+-keep class androidx.viewpager2.** { *; }
+-dontwarn androidx.viewpager2.**
+
+# BottomNavigationView
+-keep class com.google.android.material.bottomnavigation.** { *; }
+-dontwarn com.google.android.material.bottomnavigation.**

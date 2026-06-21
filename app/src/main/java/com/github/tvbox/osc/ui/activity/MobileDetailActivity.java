@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.github.tvbox.osc.R;
-import com.github.tvbox.osc.base.BaseActivity;
+import com.github.tvbox.osc.base.BaseMobileActivity;
 import com.github.tvbox.osc.bean.AbsXml;
 import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.bean.VodInfo;
@@ -45,7 +45,7 @@ import java.util.List;
  * 全屏背景图 + 渐变遮罩 + 标题/信息/简介/选集
  * 复用原版 DetailActivity 的详情加载逻辑(getDetail/VodInfo/选集列表)
  */
-public class MobileDetailActivity extends BaseActivity {
+public class MobileDetailActivity extends BaseMobileActivity {
 
     public static final String EXTRA_ID = "id";
     public static final String EXTRA_SOURCE_KEY = "sourceKey";
@@ -232,6 +232,23 @@ public class MobileDetailActivity extends BaseActivity {
         setLoadSir(rvEpisodes);
     }
 
+    // TVBOX-NEXT 优化#10: 重写 setLoadSir,提供错误重试回调
+    @Override
+    protected void setLoadSir(View view) {
+        if (mLoadService == null) {
+            mLoadService = com.kingja.loadsir.core.LoadSir.getDefault().register(view, new com.kingja.loadsir.callback.Callback.OnReloadListener() {
+                @Override
+                public void onReload(View v) {
+                    // 点击空状态/加载状态时重试
+                    if (vodId != null && sourceKey != null) {
+                        showLoading();
+                        sourceViewModel.getDetail(sourceKey, vodId);
+                    }
+                }
+            });
+        }
+    }
+
     /**
      * 复用原版 DetailActivity.initViewModel()
      * 观察 detailResult LiveData
@@ -323,7 +340,9 @@ public class MobileDetailActivity extends BaseActivity {
                         rvEpisodes.setVisibility(View.GONE);
                     }
                 } else {
+                    // TVBOX-NEXT 优化#10: 详情加载失败,显示空状态和错误提示
                     showEmpty();
+                    Toast.makeText(MobileDetailActivity.this, "详情加载失败,点击重试", Toast.LENGTH_SHORT).show();
                 }
             }
         });

@@ -2,7 +2,6 @@ package com.github.tvbox.osc.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -13,7 +12,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
-import com.github.tvbox.osc.base.BaseActivity;
+import com.github.tvbox.osc.base.BaseMobileActivity;
 import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.ui.dialog.TipDialog;
 import com.github.tvbox.osc.ui.fragment.MobileDownloadsFragment;
@@ -31,7 +30,7 @@ import com.orhanobut.hawk.Hawk;
  * 底部导航 + ViewPager2 管理 4 个 Fragment(首页/搜索/文件/我的)
  * 复用原版 HomeActivity 的 ApiConfig 初始化和数据加载逻辑
  */
-public class MobileHomeActivity extends BaseActivity {
+public class MobileHomeActivity extends BaseMobileActivity {
 
     private ViewPager2 viewPager;
     private BottomNavigationView bottomNav;
@@ -39,7 +38,7 @@ public class MobileHomeActivity extends BaseActivity {
     private boolean dataInitOk = false;
     private boolean jarInitOk = false;
     boolean useCacheConfig = false;
-    private final Handler mHandler = new Handler();
+    // TVBOX-NEXT 优化#11: 使用 BaseMobileActivity 的 mMobileHandler
 
     @Override
     protected int getLayoutResID() {
@@ -118,7 +117,7 @@ public class MobileHomeActivity extends BaseActivity {
                     @Override
                     public void success() {
                         jarInitOk = true;
-                        mHandler.postDelayed(new Runnable() {
+                        mMobileHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 initData();
@@ -134,7 +133,7 @@ public class MobileHomeActivity extends BaseActivity {
                     public void error(String msg) {
                         jarInitOk = true;
                         dataInitOk = true;
-                        mHandler.postDelayed(new Runnable() {
+                        mMobileHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 initData();
@@ -150,7 +149,7 @@ public class MobileHomeActivity extends BaseActivity {
 
             @Override
             public void retry() {
-                mHandler.post(new Runnable() {
+                mMobileHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         initData();
@@ -164,7 +163,7 @@ public class MobileHomeActivity extends BaseActivity {
                 if (ApiConfig.get().getSpider().isEmpty()) {
                     jarInitOk = true;
                 }
-                mHandler.postDelayed(new Runnable() {
+                mMobileHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         initData();
@@ -175,7 +174,7 @@ public class MobileHomeActivity extends BaseActivity {
             @Override
             public void error(String msg) {
                 if (msg != null && msg.equalsIgnoreCase("-1")) {
-                    mHandler.post(new Runnable() {
+                    mMobileHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             dataInitOk = true;
@@ -185,14 +184,14 @@ public class MobileHomeActivity extends BaseActivity {
                     });
                     return;
                 }
-                mHandler.post(new Runnable() {
+                mMobileHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         if (dialog == null)
                             dialog = new TipDialog(MobileHomeActivity.this, msg, getString(R.string.hm_retry), getString(R.string.hm_cancel), new TipDialog.OnListener() {
                                 @Override
                                 public void left() {
-                                    mHandler.post(new Runnable() {
+                                    mMobileHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
                                             initData();
@@ -205,7 +204,7 @@ public class MobileHomeActivity extends BaseActivity {
                                 public void right() {
                                     dataInitOk = true;
                                     jarInitOk = true;
-                                    mHandler.post(new Runnable() {
+                                    mMobileHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
                                             initData();
@@ -218,7 +217,7 @@ public class MobileHomeActivity extends BaseActivity {
                                 public void cancel() {
                                     dataInitOk = true;
                                     jarInitOk = true;
-                                    mHandler.post(new Runnable() {
+                                    mMobileHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
                                             initData();

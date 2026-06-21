@@ -47,7 +47,8 @@ import xyz.doikki.videoplayer.util.CutoutUtil;
  */
 public abstract class BaseActivity extends AppCompatActivity implements CustomAdapt {
     protected Context mContext;
-    private LoadService mLoadService;
+    // TVBOX-NEXT 优化#11: 改为 protected,允许子类(如 BaseMobileActivity)访问
+    protected LoadService mLoadService;
 
     private static float screenRatio = -100.0f;
 
