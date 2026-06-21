@@ -62,6 +62,8 @@ public class MobileHomeFragment extends Fragment {
     private LinearLayout rowsContainer;
     private RecyclerView rvHotList;
     private MobileGridAdapter hotAdapter;
+    private View emptyState;
+    private TextView tvEmptyHint;
 
     // 站点推荐数据(由 MobileHomeActivity 通过 sortResult 设置)
     private static List<Movie.Video> homeSourceRec = null;
@@ -87,6 +89,15 @@ public class MobileHomeFragment extends Fragment {
         tvHeroRate = view.findViewById(R.id.tvHeroRate);
         tvHeroDesc = view.findViewById(R.id.tvHeroDesc);
         rowsContainer = view.findViewById(R.id.rowsContainer);
+        emptyState = view.findViewById(R.id.emptyState);
+        tvEmptyHint = view.findViewById(R.id.tvEmptyHint);
+
+        // "去设置"按钮
+        View btnGoSetting = view.findViewById(R.id.btnGoSetting);
+        btnGoSetting.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), SettingActivity.class);
+            startActivity(intent);
+        });
 
         // Hero 按钮触摸动画
         View btnPlay = view.findViewById(R.id.btnHeroPlay);
@@ -129,9 +140,12 @@ public class MobileHomeFragment extends Fragment {
                         homeSourceRec = absXml.videoList;
                         // 站点推荐模式:刷新列表
                         if (Hawk.get(HawkConfig.HOME_REC, 0) == 1 && hotAdapter != null) {
+                            hideEmptyState();
                             hotAdapter.setNewData(homeSourceRec);
                             updateHero(homeSourceRec);
                         }
+                    } else if (Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
+                        showEmptyState("站点推荐数据为空,请检查源配置");
                     }
                 }
             });
@@ -230,8 +244,13 @@ public class MobileHomeFragment extends Fragment {
                 String json = Hawk.get("home_hot", "");
                 if (!json.isEmpty()) {
                     ArrayList<Movie.Video> hots = loadHots(json);
-                    hotAdapter.setNewData(hots);
-                    updateHero(hots);
+                    if (hots.isEmpty()) {
+                        showEmptyState("豆瓣数据为空,请尝试切换为站点推荐");
+                    } else {
+                        hideEmptyState();
+                        hotAdapter.setNewData(hots);
+                        updateHero(hots);
+                    }
                     return;
                 }
             }
@@ -248,10 +267,23 @@ public class MobileHomeFragment extends Fragment {
                             @Override
                             public void run() {
                                 ArrayList<Movie.Video> hots = loadHots(netJson);
-                                hotAdapter.setNewData(hots);
-                                updateHero(hots);
+                                if (hots.isEmpty()) {
+                                    showEmptyState("豆瓣数据为空,请在设置中切换为站点推荐");
+                                } else {
+                                    hideEmptyState();
+                                    hotAdapter.setNewData(hots);
+                                    updateHero(hots);
+                                }
                             }
                         });
+                    }
+                }
+
+                @Override
+                public void onError(Response<String> response) {
+                    super.onError(response);
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> showEmptyState("网络请求失败,请检查网络或配置源地址"));
                     }
                 }
 
@@ -262,6 +294,7 @@ public class MobileHomeFragment extends Fragment {
             });
         } catch (Throwable th) {
             th.printStackTrace();
+            showEmptyState("数据加载失败,请稍后重试");
         }
     }
 
@@ -282,8 +315,13 @@ public class MobileHomeFragment extends Fragment {
                 vod.note = "上次看到" + vodInfo.playNote;
             vodList.add(vod);
         }
-        hotAdapter.setNewData(vodList);
-        updateHero(vodList);
+        if (vodList.isEmpty()) {
+            showEmptyState("暂无观看历史");
+        } else {
+            hideEmptyState();
+            hotAdapter.setNewData(vodList);
+            updateHero(vodList);
+        }
     }
 
     /**
@@ -323,6 +361,26 @@ public class MobileHomeFragment extends Fragment {
         tvHeroType.setText(video.type != null ? video.type : "");
         tvHeroRate.setText(video.note != null ? video.note : "");
         tvHeroDesc.setText(video.des != null ? video.des : "");
+    }
+
+    /**
+     * 显示空状态提示
+     */
+    private void showEmptyState(String hint) {
+        if (emptyState == null) return;
+        emptyState.setVisibility(View.VISIBLE);
+        if (hint != null && tvEmptyHint != null) {
+            tvEmptyHint.setText(hint);
+        }
+    }
+
+    /**
+     * 隐藏空状态提示
+     */
+    private void hideEmptyState() {
+        if (emptyState != null) {
+            emptyState.setVisibility(View.GONE);
+        }
     }
 
     @Override

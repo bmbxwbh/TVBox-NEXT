@@ -19,6 +19,7 @@ import com.github.tvbox.osc.ui.adapter.SettingMenuAdapter;
 import com.github.tvbox.osc.ui.adapter.SettingPageAdapter;
 import com.github.tvbox.osc.ui.fragment.ModelSettingFragment;
 import com.github.tvbox.osc.util.AppManager;
+import com.github.tvbox.osc.util.DeviceTypeDetector;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.orhanobut.hawk.Hawk;
 import com.owen.tvrecyclerview.widget.TvRecyclerView;
@@ -184,12 +185,15 @@ public class SettingActivity extends BaseActivity {
                 homeRec != Hawk.get(HawkConfig.HOME_REC, 0) ||
                 dnsOpt != Hawk.get(HawkConfig.DOH_URL, 0)) {
             AppManager.getInstance().finishAllActivity();
+            // TVBOX-NEXT: 根据设备类型跳转到正确的首页
+            Class<?> homeClass = DeviceTypeDetector.isMobile(this)
+                    ? MobileHomeActivity.class : HomeActivity.class;
             if (currentApi.equals(Hawk.get(HawkConfig.API_URL, "")) & (currentLive.equals(Hawk.get(HawkConfig.LIVE_URL, "")))) {
                 Bundle bundle = new Bundle();
                 bundle.putBoolean("useCache", true);
-                jumpActivity(HomeActivity.class, bundle);
+                jumpActivity(homeClass, bundle);
             } else {
-                jumpActivity(HomeActivity.class);
+                jumpActivity(homeClass);
             }
         } else {
             super.onBackPressed();
