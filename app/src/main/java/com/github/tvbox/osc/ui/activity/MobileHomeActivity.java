@@ -14,14 +14,17 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.base.BaseActivity;
+import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.ui.dialog.TipDialog;
 import com.github.tvbox.osc.ui.fragment.MobileDownloadsFragment;
 import com.github.tvbox.osc.ui.fragment.MobileHomeFragment;
 import com.github.tvbox.osc.ui.fragment.MobileProfileFragment;
 import com.github.tvbox.osc.ui.fragment.MobileSearchFragment;
+import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.viewmodel.SourceViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.orhanobut.hawk.Hawk;
 
 /**
  * TVBOX-NEXT: 手机端首页 Activity
@@ -95,7 +98,18 @@ public class MobileHomeActivity extends BaseActivity {
      */
     private void initData() {
         if (dataInitOk && jarInitOk) {
-            sourceViewModel.getSort(ApiConfig.get().getHomeSourceBean().getKey());
+            // TVBOX-NEXT: 豆瓣推荐模式(HOME_REC=0)不需要调用 getSort
+            if (Hawk.get(HawkConfig.HOME_REC, 0) != 1) {
+                return;
+            }
+            try {
+                SourceBean homeSourceBean = ApiConfig.get().getHomeSourceBean();
+                if (homeSourceBean != null && homeSourceBean.getKey() != null) {
+                    sourceViewModel.getSort(homeSourceBean.getKey());
+                }
+            } catch (Throwable th) {
+                th.printStackTrace();
+            }
             return;
         }
         if (dataInitOk && !jarInitOk) {
@@ -160,7 +174,7 @@ public class MobileHomeActivity extends BaseActivity {
 
             @Override
             public void error(String msg) {
-                if (msg.equalsIgnoreCase("-1")) {
+                if (msg != null && msg.equalsIgnoreCase("-1")) {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
