@@ -186,14 +186,20 @@ public class SettingActivity extends BaseActivity {
                 dnsOpt != Hawk.get(HawkConfig.DOH_URL, 0)) {
             AppManager.getInstance().finishAllActivity();
             // TVBOX-NEXT: 根据设备类型跳转到正确的首页
-            Class<?> homeClass = DeviceTypeDetector.isMobile(this)
-                    ? MobileHomeActivity.class : HomeActivity.class;
             if (currentApi.equals(Hawk.get(HawkConfig.API_URL, "")) & (currentLive.equals(Hawk.get(HawkConfig.LIVE_URL, "")))) {
                 Bundle bundle = new Bundle();
                 bundle.putBoolean("useCache", true);
-                jumpActivity(homeClass, bundle);
+                if (DeviceTypeDetector.isMobile(this)) {
+                    jumpActivity(MobileHomeActivity.class, bundle);
+                } else {
+                    jumpActivity(HomeActivity.class, bundle);
+                }
             } else {
-                jumpActivity(homeClass);
+                if (DeviceTypeDetector.isMobile(this)) {
+                    jumpActivity(MobileHomeActivity.class);
+                } else {
+                    jumpActivity(HomeActivity.class);
+                }
             }
         } else {
             super.onBackPressed();
