@@ -8,11 +8,11 @@ def static buildTime() {
 }
 
 android {
-    compileSdk 36
+    compileSdk 33
 
     defaultConfig {
         applicationId 'com.github.tvbox.osc.tk'
-        targetSdkVersion 36
+        targetSdkVersion 33
         minSdkVersion 21
         versionCode 1
         versionName "1.0.".concat(buildTime())
