@@ -6,26 +6,28 @@
     <!-- 起始状态:顶部栏完全可见 -->
     <ConstraintSet android:id="@+id/start">
         <Constraint android:id="@+id/topLayout">
-            <PropertySet motion:visibilityMode="visible" />
+            <PropertySet android:visibility="visible" />
             <Transform
-                motion:translateY="0"
-                motion:alpha="1" />
+                android:translationY="0dp"
+                android:alpha="1" />
         </Constraint>
         <Constraint android:id="@+id/contentLayout">
-            <Transform motion:translationY="0" />
+            <Transform
+                android:translationY="0dp" />
         </Constraint>
     </ConstraintSet>
 
     <!-- 结束状态:顶部栏隐藏 -->
     <ConstraintSet android:id="@+id/end">
         <Constraint android:id="@+id/topLayout">
-            <PropertySet motion:visibilityMode="invisible" />
+            <PropertySet android:visibility="invisible" />
             <Transform
-                motion:translateY="-100"
-                motion:alpha="0" />
+                android:translationY="-100dp"
+                android:alpha="0" />
         </Constraint>
         <Constraint android:id="@+id/contentLayout">
-            <Transform motion:translationY="-100" />
+            <Transform
+                android:translationY="-100dp" />
         </Constraint>
     </ConstraintSet>
 
