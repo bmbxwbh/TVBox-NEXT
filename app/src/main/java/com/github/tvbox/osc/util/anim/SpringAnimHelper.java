@@ -18,7 +18,7 @@ public class SpringAnimHelper {
      * @param view 目标 View
      */
     public static void focusScaleUp(View view) {
-        scale(view, 1.1f, AnimInterceptor.FOCUS_SPRING);
+        scale(view, 1.1f, AnimInterpolator.FOCUS_SPRING);
     }
 
     /**
@@ -30,9 +30,9 @@ public class SpringAnimHelper {
     public static void bindFocusScale(View view) {
         view.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
-                scale(v, 1.1f, AnimInterceptor.FOCUS_SPRING);
+                scale(v, 1.1f, AnimInterpolator.FOCUS_SPRING);
             } else {
-                scale(v, 1.0f, AnimInterceptor.FOCUS_SPRING);
+                scale(v, 1.0f, AnimInterpolator.FOCUS_SPRING);
             }
         });
     }
@@ -44,7 +44,7 @@ public class SpringAnimHelper {
      * @param view 目标 View
      */
     public static void focusScaleDown(View view) {
-        scale(view, 1.0f, AnimInterceptor.FOCUS_SPRING);
+        scale(view, 1.0f, AnimInterpolator.FOCUS_SPRING);
     }
 
     /**
@@ -54,7 +54,7 @@ public class SpringAnimHelper {
      * @param view 目标 View
      */
     public static void touchPress(View view) {
-        scale(view, 0.95f, AnimInterceptor.TOUCH_PRESS_SPRING);
+        scale(view, 0.95f, AnimInterpolator.TOUCH_PRESS_SPRING);
     }
 
     /**
@@ -64,7 +64,7 @@ public class SpringAnimHelper {
      * @param view 目标 View
      */
     public static void touchRelease(View view) {
-        scale(view, 1.0f, AnimInterceptor.TOUCH_RELEASE_SPRING);
+        scale(view, 1.0f, AnimInterpolator.TOUCH_RELEASE_SPRING);
     }
 
     /**
@@ -77,7 +77,7 @@ public class SpringAnimHelper {
         view.setScaleX(0f);
         view.setScaleY(0f);
         view.setVisibility(View.VISIBLE);
-        scale(view, 1.0f, AnimInterceptor.POPUP_SPRING);
+        scale(view, 1.0f, AnimInterpolator.POPUP_SPRING);
     }
 
     /**

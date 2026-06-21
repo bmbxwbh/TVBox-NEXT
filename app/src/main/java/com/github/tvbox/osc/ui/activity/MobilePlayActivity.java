@@ -176,7 +176,7 @@ public class MobilePlayActivity extends AppCompatActivity {
                 startBrightness = getCurrentBrightness();
                 startVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
                 if (mVideoView != null) {
-                    startProgress = mVideoView.getCurrentPosition();
+                    startProgress = (int) mVideoView.getCurrentPosition();
                 }
                 break;
 
@@ -190,7 +190,8 @@ public class MobilePlayActivity extends AppCompatActivity {
                 if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
                     int seekAmount = (int) (dx / screenWidth * 120000); // 最多 2 分钟
                     int newProgress = startProgress + seekAmount;
-                    newProgress = Math.max(0, Math.min(newProgress, mVideoView != null ? mVideoView.getDuration() : 0));
+                    int duration = mVideoView != null ? (int) mVideoView.getDuration() : 0;
+                    newProgress = Math.max(0, Math.min(newProgress, duration));
                     showGestureHint(R.drawable.v_ffwd, formatTime(newProgress));
                     if (mVideoView != null && !isSeeking) {
                         mVideoView.seekTo(newProgress);

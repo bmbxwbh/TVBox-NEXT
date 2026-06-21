@@ -8,7 +8,7 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.util.ImgUtil;
-import com.github.tvbox.osc.util.SpringAnimHelper;
+import com.github.tvbox.osc.util.anim.SpringAnimHelper;
 
 import java.util.ArrayList;
 

@@ -7,7 +7,7 @@ import android.os.Handler;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentStateAdapter;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
