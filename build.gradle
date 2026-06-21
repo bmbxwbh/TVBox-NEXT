@@ -41,6 +41,12 @@ allprojects {
         mavenCentral()
         gradlePluginPortal()
         maven { url "https://jitpack.io" }
+        // CI 环境:官方仓库找不到时回退到阿里云镜像(旧依赖如 loadsir/autosize/okgo 等)
+        if (System.getenv("CI") != null) {
+            maven { url "https://maven.aliyun.com/repository/public" }
+            maven { url "https://maven.aliyun.com/repository/google" }
+            maven { url "https://maven.aliyun.com/repository/central" }
+        }
     }
 }
 
