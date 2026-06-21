@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- TVBOX-NEXT: 手机端尺寸(小卡片、小字体) -->
+    <dimen name="hero_card_height">280dp</dimen>
+    <dimen name="big_card_width">160dp</dimen>
+    <dimen name="big_card_height">90dp</dimen>
+
+    <dimen name="text_hero_title">28sp</dimen>
+    <dimen name="text_card_title">14sp</dimen>
+    <dimen name="text_card_info">12sp</dimen>
+    <dimen name="text_row_title">18sp</dimen>
+
+    <dimen name="spacing_hero_padding">16dp</dimen>
+    <dimen name="spacing_card_padding">8dp</dimen>
+    <dimen name="spacing_row_padding">16dp</dimen>
+
+    <!-- 原有 autosize 尺寸(mm 单位) -->
     <dimen name="ts_10">10mm</dimen>
     <dimen name="ts_12">12mm</dimen>
     <dimen name="ts_14">14mm</dimen>

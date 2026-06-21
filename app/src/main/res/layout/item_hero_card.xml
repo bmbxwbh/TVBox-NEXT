@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TVBOX-NEXT: Hero 大卡片区(Netflix 风格,占屏幕 40% 高度) -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <!-- 背景图(剧照/横图) -->
+    <ImageView
+        android:id="@+id/ivHeroBg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/app_name" />
+
+    <!-- 底部渐变遮罩,使文字可读 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/shape_hero_gradient" />
+
+    <!-- 内容区:标题 + 信息标签 + 简介 + 按钮 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/vs_50"
+        android:paddingRight="@dimen/vs_50"
+        android:paddingBottom="@dimen/vs_30">
+
+        <!-- 影片标题(大字号) -->
+        <TextView
+            android:id="@+id/tvHeroTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:shadowColor="@color/color_000000_90"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="8"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/ts_40"
+            android:textStyle="bold" />
+
+        <!-- 信息标签行:年份 / 类型 / 评分 / 新集 -->
+        <LinearLayout
+            android:id="@+id/llHeroTags"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_10"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvHeroYear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/vs_8"
+                android:background="@drawable/shape_hero_info_tag"
+                android:paddingLeft="@dimen/vs_8"
+                android:paddingTop="@dimen/vs_2"
+                android:paddingRight="@dimen/vs_8"
+                android:paddingBottom="@dimen/vs_2"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/ts_18" />
+
+            <TextView
+                android:id="@+id/tvHeroType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/vs_8"
+                android:background="@drawable/shape_hero_info_tag"
+                android:paddingLeft="@dimen/vs_8"
+                android:paddingTop="@dimen/vs_2"
+                android:paddingRight="@dimen/vs_8"
+                android:paddingBottom="@dimen/vs_2"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/ts_18" />
+
+            <TextView
+                android:id="@+id/tvHeroRate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_hero_info_tag"
+                android:paddingLeft="@dimen/vs_8"
+                android:paddingTop="@dimen/vs_2"
+                android:paddingRight="@dimen/vs_8"
+                android:paddingBottom="@dimen/vs_2"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/ts_18" />
+        </LinearLayout>
+
+        <!-- 简介(2 行) -->
+        <TextView
+            android:id="@+id/tvHeroDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_10"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:shadowColor="@color/color_000000_90"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="4"
+            android:textColor="@color/color_FFFFFF_80"
+            android:textSize="@dimen/ts_18" />
+
+        <!-- 操作按钮行:播放 / 收藏 / 详情 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_15"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btnHeroPlay"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/vs_45"
+                android:background="@drawable/shape_hero_play_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:nextFocusRight="@id/btnHeroFav"
+                android:nextFocusUp="@id/tvHeroTitle"
+                android:paddingLeft="@dimen/vs_30"
+                android:paddingRight="@dimen/vs_30"
+                android:text="▶  播放"
+                android:textColor="@color/color_141414"
+                android:textSize="@dimen/ts_22"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btnHeroFav"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/vs_45"
+                android:layout_marginStart="@dimen/vs_15"
+                android:background="@drawable/shape_hero_secondary_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:nextFocusLeft="@id/btnHeroPlay"
+                android:nextFocusRight="@id/btnHeroDetail"
+                android:nextFocusUp="@id/tvHeroTitle"
+                android:paddingLeft="@dimen/vs_25"
+                android:paddingRight="@dimen/vs_25"
+                android:text="+ 收藏"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/ts_22" />
+
+            <TextView
+                android:id="@+id/btnHeroDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/vs_45"
+                android:layout_marginStart="@dimen/vs_15"
+                android:background="@drawable/shape_hero_secondary_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:nextFocusLeft="@id/btnHeroFav"
+                android:nextFocusUp="@id/tvHeroTitle"
+                android:paddingLeft="@dimen/vs_25"
+                android:paddingRight="@dimen/vs_25"
+                android:text="ℹ 详情"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/ts_22" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

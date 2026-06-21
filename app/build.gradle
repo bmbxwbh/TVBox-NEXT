@@ -8,11 +8,12 @@ def static buildTime() {
 }
 
 android {
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         applicationId 'com.github.tvbox.osc.tk'
-        targetSdkVersion 28
+        targetSdkVersion 36
+        minSdkVersion 19
         versionCode 1
         versionName "1.0.".concat(buildTime())
         multiDexEnabled true
@@ -62,12 +63,10 @@ android {
         }
         normal {
             dimension = "mode"
-            minSdkVersion 21
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         python {
             dimension = "mode"
-            minSdkVersion 21
             // Python 版本需要额外的 Proguard 规则
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', 'proguard-python.pro'
         }
@@ -182,6 +181,14 @@ dependencies {
         exclude group: 'stax', module: 'stax-api'
         exclude group: 'xpp3', module: 'xpp3'
     }
+
+    // TVBOX-NEXT: 动画与交互依赖
+    implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
+    implementation 'androidx.transition:transition:1.5.1'
+    implementation 'androidx.palette:palette-ktx:1.0.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
+
     configurations {
         configureEach {
             exclude group: 'xpp3', module: 'xpp3'

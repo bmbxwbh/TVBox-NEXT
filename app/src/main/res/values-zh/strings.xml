@@ -4,6 +4,12 @@
     <string name="app_home">首页</string>
     <string name="app_source"></string>
 
+    <!-- TVBOX-NEXT: 手机端底部导航 -->
+    <string name="nav_home">首页</string>
+    <string name="nav_search">搜索</string>
+    <string name="nav_downloads">文件</string>
+    <string name="nav_profile">我的</string>
+
     // Home Page //
     <string name="hm_ok">加载成功</string>
     <string name="hm_notok">加载失败</string>

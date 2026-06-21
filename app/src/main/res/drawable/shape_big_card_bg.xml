@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TVBOX-NEXT: 大矩形卡片焦点背景 selector -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape>
+            <corners android:radius="@dimen/vs_8" />
+            <solid android:color="@color/color_2F2F2F" />
+            <stroke android:width="3mm" android:color="@color/color_E50914" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape>
+            <corners android:radius="@dimen/vs_8" />
+            <solid android:color="@color/color_2F2F2F" />
+            <stroke android:width="2mm" android:color="@color/color_E50914" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <corners android:radius="@dimen/vs_8" />
+            <solid android:color="@color/color_2F2F2F" />
+        </shape>
+    </item>
+</selector>

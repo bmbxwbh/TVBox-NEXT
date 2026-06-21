@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TVBOX-NEXT: 平板专用尺寸(中等卡片、中等字体) -->
+<resources>
+    <!-- 平板卡片尺寸 -->
+    <dimen name="hero_card_height">320dp</dimen>
+    <dimen name="big_card_width">240dp</dimen>
+    <dimen name="big_card_height">135dp</dimen>
+
+    <!-- 平板字体尺寸 -->
+    <dimen name="text_hero_title">32sp</dimen>
+    <dimen name="text_card_title">18sp</dimen>
+    <dimen name="text_card_info">13sp</dimen>
+    <dimen name="text_row_title">22sp</dimen>
+
+    <!-- 平板间距 -->
+    <dimen name="spacing_hero_padding">32dp</dimen>
+    <dimen name="spacing_card_padding">12dp</dimen>
+    <dimen name="spacing_row_padding">32dp</dimen>
+</resources>

@@ -78,9 +78,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -95,12 +93,8 @@ public class HomeActivity extends BaseActivity {
     private LinearLayout topLayout;
     private LinearLayout contentLayout;
     private TextView tvName;
-    private ImageView tvWifi;
     private ImageView tvFind;
-    private ImageView tvStyle;
-    private ImageView tvDraw;
     private ImageView tvMenu;
-    private TextView tvDate;
     private TvRecyclerView mGridView;
     private NoScrollViewPager mViewPager;
     private SourceViewModel sourceViewModel;
@@ -114,18 +108,6 @@ public class HomeActivity extends BaseActivity {
     public View sortFocusView = null;
     private final Handler mHandler = new Handler();
     private long mExitTime = 0;
-    private final Runnable mRunnable = new Runnable() {
-        @SuppressLint({"DefaultLocale", "SetTextI18n"})
-        @Override
-        public void run() {
-            Date date = new Date();
-            @SuppressLint("SimpleDateFormat")
-			//修改时间分隔符
-            SimpleDateFormat timeFormat = new SimpleDateFormat(getString(R.string.hm_date1) + " | " + getString(R.string.hm_date2));
-            tvDate.setText(timeFormat.format(date));
-            mHandler.postDelayed(this, 1000);
-        }
-    };
 
     @Override
     protected int getLayoutResID() {
@@ -161,12 +143,8 @@ public class HomeActivity extends BaseActivity {
     private void initView() {
         this.topLayout = findViewById(R.id.topLayout);
         this.tvName = findViewById(R.id.tvName);
-        this.tvWifi = findViewById(R.id.tvWifi);
         this.tvFind = findViewById(R.id.tvFind);
-        this.tvStyle = findViewById(R.id.tvStyle);
-        this.tvDraw = findViewById(R.id.tvDrawer);
         this.tvMenu = findViewById(R.id.tvMenu);
-        this.tvDate = findViewById(R.id.tvDate);
         this.contentLayout = findViewById(R.id.contentLayout);
         this.mGridView = findViewById(R.id.mGridViewCategory);
         this.mViewPager = findViewById(R.id.mViewPager);
@@ -293,49 +271,11 @@ public class HomeActivity extends BaseActivity {
                 return true;
             }
         });
-        // Button : Wifi >> Go into Android Wifi Settings -------------
-        tvWifi.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
-                }catch (Exception ignored){
-                }
-            }
-        });
         // Button : Search --------------------------------------------
         tvFind.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 jumpActivity(SearchActivity.class);
-            }
-        });
-        // Button : Style --------------------------------------------
-        tvStyle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    Hawk.put(HawkConfig.HOME_REC_STYLE, !Hawk.get(HawkConfig.HOME_REC_STYLE, false));
-                    if (Hawk.get(HawkConfig.HOME_REC_STYLE, false)) {
-                        UserFragment.tvHotListForGrid.setVisibility(View.VISIBLE);
-                        UserFragment.tvHotListForLine.setVisibility(View.GONE);
-                        Toast.makeText(HomeActivity.this, getString(R.string.hm_style_grid), Toast.LENGTH_SHORT).show();
-                        tvStyle.setImageResource(R.drawable.hm_up_down);
-                    } else {
-                        UserFragment.tvHotListForGrid.setVisibility(View.GONE);
-                        UserFragment.tvHotListForLine.setVisibility(View.VISIBLE);
-                        Toast.makeText(HomeActivity.this, getString(R.string.hm_style_line), Toast.LENGTH_SHORT).show();
-                        tvStyle.setImageResource(R.drawable.hm_left_right);
-                    }
-                } catch (Exception ex) {
-                }
-            }
-        });
-        // Button : Drawer >> To go into App Drawer -------------------
-        tvDraw.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                jumpActivity(AppsActivity.class);
             }
         });
         // Button : Settings >> To go into Settings --------------------
@@ -351,13 +291,6 @@ public class HomeActivity extends BaseActivity {
             public boolean onLongClick(View view) {
                 startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", getPackageName(), null)));
                 return true;
-            }
-        });
-        // Button : Date >> Go into Android Date Settings --------------
-        tvDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(Settings.ACTION_DATE_SETTINGS));
             }
         });
         setLoadSir(this.contentLayout);
@@ -428,19 +361,12 @@ public class HomeActivity extends BaseActivity {
         if (isNetworkAvailable()) {
             ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
             if (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI) {
-                tvWifi.setImageDrawable(res.getDrawable(R.drawable.hm_wifi));
+                // TVBOX-NEXT: WiFi 图标已移除
             } else if (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_MOBILE) {
-                tvWifi.setImageDrawable(res.getDrawable(R.drawable.hm_mobile));
+                // TVBOX-NEXT: 移动网络图标已移除
             } else if (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_ETHERNET) {
-                tvWifi.setImageDrawable(res.getDrawable(R.drawable.hm_lan));
+                // TVBOX-NEXT: 以太网图标已移除
             }
-        }
-
-        // takagen99: Set Style either Grid or Line
-        if (Hawk.get(HawkConfig.HOME_REC_STYLE, false)) {
-            tvStyle.setImageResource(R.drawable.hm_up_down);
-        } else {
-            tvStyle.setImageResource(R.drawable.hm_left_right);
         }
 
         mGridView.requestFocus();
@@ -706,7 +632,7 @@ public class HomeActivity extends BaseActivity {
         } else {
             tvMenu.setVisibility(View.GONE);
         }
-        mHandler.post(mRunnable);
+        // TVBOX-NEXT: 日期显示已移除
     }
 
     @Override
@@ -810,10 +736,7 @@ public class HomeActivity extends BaseActivity {
             animatorSet.setDuration(250);
             animatorSet.start();
             tvName.setFocusable(false);
-            tvWifi.setFocusable(false);
             tvFind.setFocusable(false);
-            tvStyle.setFocusable(false);
-            tvDraw.setFocusable(false);
             tvMenu.setFocusable(false);
             return;
         }
@@ -829,10 +752,7 @@ public class HomeActivity extends BaseActivity {
             animatorSet.setDuration(250);
             animatorSet.start();
             tvName.setFocusable(true);
-            tvWifi.setFocusable(true);
             tvFind.setFocusable(true);
-            tvStyle.setFocusable(true);
-            tvDraw.setFocusable(true);
             tvMenu.setFocusable(true);
         }
     }

@@ -12,6 +12,12 @@
     <!-- Main Dialog Button BG -->
     <color name="color_theme_dark_70">#B3601216</color>
 
+    <!-- TVBOX-NEXT: Netflix 风格配色 -->
+    <color name="color_141414">#141414</color>
+    <color name="color_2F2F2F">#2F2F2F</color>
+    <color name="color_E50914">#E50914</color>
+    <color name="color_B3B3B3">#B3B3B3</color>
+
     <!-- EPG Colors -->
     <color name="color_32364E">#32364E</color>
     <color name="color_32364E_80">#CC32364E</color>

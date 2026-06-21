@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TVBOX-NEXT: Hero 次要按钮(收藏/详情,半透明灰色背景) -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape>
+            <corners android:radius="@dimen/vs_4" />
+            <solid android:color="@color/color_FFFFFF_70" />
+            <stroke android:width="2mm" android:color="@android:color/white" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape>
+            <corners android:radius="@dimen/vs_4" />
+            <solid android:color="@color/color_FFFFFF_50" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <corners android:radius="@dimen/vs_4" />
+            <solid android:color="@color/color_2F2F2F" />
+        </shape>
+    </item>
+</selector>

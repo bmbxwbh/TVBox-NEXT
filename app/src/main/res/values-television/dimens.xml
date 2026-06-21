@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TVBOX-NEXT: TV 端专用尺寸(大卡片、大字体) -->
+<resources>
+    <!-- TV 端卡片尺寸 -->
+    <dimen name="hero_card_height">400dp</dimen>
+    <dimen name="big_card_width">300dp</dimen>
+    <dimen name="big_card_height">170dp</dimen>
+
+    <!-- TV 端字体尺寸 -->
+    <dimen name="text_hero_title">40sp</dimen>
+    <dimen name="text_card_title">22sp</dimen>
+    <dimen name="text_card_info">15sp</dimen>
+    <dimen name="text_row_title">26sp</dimen>
+
+    <!-- TV 端间距 -->
+    <dimen name="spacing_hero_padding">50dp</dimen>
+    <dimen name="spacing_card_padding">15dp</dimen>
+    <dimen name="spacing_row_padding">50dp</dimen>
+</resources>

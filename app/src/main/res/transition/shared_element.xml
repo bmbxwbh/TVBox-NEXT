@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TVBOX-NEXT: 共享元素转场配置(一镜到底效果) -->
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
+    android:transitionOrdering="together">
+
+    <!-- 共享元素(图片)的 ChangeBounds 动画 -->
+    <changeBounds>
+        <targets>
+            <target android:excludeId="@android:id/statusBarBackground" />
+            <target android:excludeId="@android:id/navigationBarBackground" />
+        </targets>
+    </changeBounds>
+
+    <!-- 共享元素(图片)的 ChangeTransform 动画 -->
+    <changeTransform />
+
+    <!-- 共享元素(图片)的 ChangeClipBounds 动画 -->
+    <changeClipBounds />
+
+    <!-- 非共享元素的渐入渐出 -->
+    <fade
+        android:duration="300"
+        android:fadingMode="fade_in_out">
+        <targets>
+            <target android:excludeId="@android:id/statusBarBackground" />
+            <target android:excludeId="@android:id/navigationBarBackground" />
+        </targets>
+    </fade>
+</transitionSet>

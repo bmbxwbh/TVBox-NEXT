@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TVBOX-NEXT: 首页 MotionScene(顶部栏滚动渐隐 + Hero 视差) -->
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto">
+
+    <!-- 起始状态:顶部栏完全可见 -->
+    <ConstraintSet android:id="@+id/start">
+        <Constraint android:id="@+id/topLayout">
+            <PropertySet motion:visibilityMode="visible" />
+            <Transform
+                motion:translateY="0"
+                motion:alpha="1" />
+        </Constraint>
+        <Constraint android:id="@+id/contentLayout">
+            <Transform motion:translationY="0" />
+        </Constraint>
+    </ConstraintSet>
+
+    <!-- 结束状态:顶部栏隐藏 -->
+    <ConstraintSet android:id="@+id/end">
+        <Constraint android:id="@+id/topLayout">
+            <PropertySet motion:visibilityMode="invisible" />
+            <Transform
+                motion:translateY="-100"
+                motion:alpha="0" />
+        </Constraint>
+        <Constraint android:id="@+id/contentLayout">
+            <Transform motion:translationY="-100" />
+        </Constraint>
+    </ConstraintSet>
+
+    <!-- 过渡:滚动时触发 -->
+    <Transition
+        motion:constraintSetStart="@id/start"
+        motion:constraintSetEnd="@id/end"
+        motion:duration="300"
+        motion:motionInterpolator="decelerate">
+        <OnSwipe
+            motion:dragDirection="dragUp"
+            motion:touchAnchorId="@id/contentLayout"
+            motion:touchAnchorSide="top" />
+    </Transition>
+</MotionScene>

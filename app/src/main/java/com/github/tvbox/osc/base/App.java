@@ -53,6 +53,11 @@ public class App extends MultiDexApplication {
     private static Server server = null;
     private final Handler handler;
 
+    // TVBOX-NEXT: 设备类型全局变量
+    public static boolean IS_TV = false;
+    public static boolean IS_MOBILE = false;
+    public static boolean IS_TABLET = false;
+
     public App() {
         instance = this;
         handler = HandlerCompat.createAsync(Looper.getMainLooper());
@@ -61,6 +66,10 @@ public class App extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        // TVBOX-NEXT: 初始化设备类型
+        IS_TV = com.github.tvbox.osc.util.DeviceTypeDetector.isTelevision(this);
+        IS_MOBILE = com.github.tvbox.osc.util.DeviceTypeDetector.isMobile(this);
+        IS_TABLET = com.github.tvbox.osc.util.DeviceTypeDetector.isTablet(this);
         SubtitleHelper.initSubtitleColor(this);
         initParams();
         // takagen99 : Initialize Locale
@@ -149,7 +158,7 @@ public class App extends MultiDexApplication {
         putDefault(HawkConfig.IJK_CODEC, "硬解码");           //IJK解码: 软解码, 硬解码
         // 系统选项
         putDefault(HawkConfig.HOME_LOCALE, 0);               //语言: 0=中文, 1=英文
-        putDefault(HawkConfig.THEME_SELECT, 0);              //主题: 0=奈飞, 1=哆啦, 2=百事, 3=鸣人, 4=小黄, 5=八神, 6=樱花
+        putDefault(HawkConfig.THEME_SELECT, 0);              //主题: 0=TVBOX-NEXT, 1=哆啦, 2=百事, 3=鸣人, 4=小黄, 5=八神, 6=樱花
         putDefault(HawkConfig.SEARCH_VIEW, 1);               //搜索展示: 0=文字列表, 1=缩略图
         putDefault(HawkConfig.PARSE_WEBVIEW, true);          //嗅探Webview: true=系统自带, false=XWalkView
         putDefault(HawkConfig.DOH_URL, 0);                   //安全DNS: 0=关闭, 1=腾讯, 2=阿里, 3=360, 4=Google, 5=AdGuard, 6=Quad9

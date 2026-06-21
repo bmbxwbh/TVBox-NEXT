@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TVBOX-NEXT: Hero 播放按钮(Netflix 风格白色主按钮) -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape>
+            <corners android:radius="@dimen/vs_4" />
+            <solid android:color="@color/color_E50914" />
+            <stroke android:width="2mm" android:color="@android:color/white" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape>
+            <corners android:radius="@dimen/vs_4" />
+            <solid android:color="@color/color_E50914" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <corners android:radius="@dimen/vs_4" />
+            <solid android:color="@color/color_FFFFFF" />
+        </shape>
+    </item>
+</selector>

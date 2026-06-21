@@ -14,6 +14,10 @@
         <item name="android:windowFullscreen">true</item>//全屏即无通知栏
         <item name="android:windowContentOverlay">@null</item>//是否有遮盖
         <item name="windowNoTitle">true</item>
+        <!-- 启用共享元素转场(一镜到底) -->
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowAllowEnterTransitionOverlap">true</item>
+        <item name="android:windowAllowReturnTransitionOverlap">true</item>
         <!--        <item name="android:keepScreenOn">true</item>-->
         <!--        <item name="android:windowBackground">@drawable/app_bg</item>-->
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -21,13 +25,15 @@
 
     <!-- Alternative Themes -->
     <style name="NetfxTheme" parent="AppTheme.NoActionBar">
-        <item name="color_theme">#D81F26</item>
-        <item name="color_theme_80">#CCD81F26</item>
-        <item name="color_theme_70">#B3D81F26</item>
-        <item name="color_theme_60">#99D81F26</item>
-        <item name="color_theme_50">#80D81F26</item>
-        <item name="color_theme_40">#66D81F26</item>
-        <item name="color_theme_dark_70">#B38C1418</item>
+        <item name="color_theme">#E50914</item>
+        <item name="color_theme_80">#CCE50914</item>
+        <item name="color_theme_70">#B3E50914</item>
+        <item name="color_theme_60">#99E50914</item>
+        <item name="color_theme_50">#80E50914</item>
+        <item name="color_theme_40">#66E50914</item>
+        <item name="color_theme_dark_70">#B38C0A0E</item>
+        <!-- TVBOX-NEXT: Netflix 深黑背景 -->
+        <item name="android:windowBackground">@color/color_141414</item>
     </style>
     <style name="DoraeTheme" parent="AppTheme.NoActionBar">
         <item name="color_theme">#18A2E7</item>

@@ -18,6 +18,8 @@ public class HawkConfig {
     public static final String EPG_URL = "epg_url";
     public static final String EPG_HISTORY = "epg_history";
     public static final String PROXY_SERVER = "proxy_server";
+    // TVBOX-NEXT: 手机端搜索历史
+    public static final String SEARCH_HISTORY = "search_history";
     // Settings
     public static final String DEBUG_OPEN = "debug_open";
     public static final String HOME_API = "home_api";
