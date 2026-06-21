@@ -8,6 +8,7 @@ def static buildTime() {
 }
 
 android {
+    namespace 'com.github.tvbox.osc'
     compileSdk 34
 
     defaultConfig {
