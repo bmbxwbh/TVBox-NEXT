@@ -1,9 +1,7 @@
 package com.github.tvbox.osc.ui.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,17 +15,17 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.github.tvbox.osc.R;
+import com.github.tvbox.osc.base.BaseActivity;
+import com.github.tvbox.osc.bean.VodInfo;
 import com.github.tvbox.osc.player.MyVideoView;
 
 /**
  * TVBOX-NEXT: 手机端播放 Activity
  * 全屏播放 + 手势控制(左滑后退/右滑前进/上下滑音量亮度/双击暂停)
+ * 复用原版 PlayActivity 的播放器逻辑
  */
-public class MobilePlayActivity extends AppCompatActivity {
+public class MobilePlayActivity extends BaseActivity {
 
     public static final String EXTRA_TITLE = "title";
 
@@ -49,6 +47,7 @@ public class MobilePlayActivity extends AppCompatActivity {
     private boolean isLocked = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable hideControlBarRunnable = this::hideControlBar;
+    private final Runnable updateProgressRunnable = this::updateProgress;
 
     // 手势相关
     private GestureDetector gestureDetector;
@@ -59,29 +58,23 @@ public class MobilePlayActivity extends AppCompatActivity {
     private int startProgress;
     private boolean isSeeking = false;
 
-    // 屏幕区域:左半屏=后退,右半屏=前进,上半屏=亮度,下半屏=音量
-    private static final int SEEK_FORWARD_MS = 10000;  // 10 秒
-    private static final int SEEK_BACKWARD_MS = 10000;
+    // 播放参数
+    private VodInfo vodInfo;
+    private String sourceKey;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_mobile_play);
+    protected int getLayoutResID() {
+        return R.layout.activity_mobile_play;
+    }
 
-        // 保持屏幕常亮
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+    @Override
+    protected void init() {
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         initView();
         initGesture();
         initListeners();
-
-        // TODO: 从 Intent 获取播放参数,加载视频源
-        String title = getIntent().getStringExtra(EXTRA_TITLE);
-        if (title != null) {
-            tvTitle.setText(title);
-        }
+        initPlayer();
     }
 
     private void initView() {
@@ -164,6 +157,38 @@ public class MobilePlayActivity extends AppCompatActivity {
     }
 
     /**
+     * 初始化播放器,从 Intent 获取播放参数
+     */
+    private void initPlayer() {
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            sourceKey = bundle.getString("sourceKey");
+            vodInfo = (VodInfo) bundle.getSerializable("VodInfo");
+            String title = bundle.getString(EXTRA_TITLE);
+            if (title != null) {
+                tvTitle.setText(title);
+            } else if (vodInfo != null && vodInfo.name != null) {
+                tvTitle.setText(vodInfo.name);
+            }
+        }
+
+        if (vodInfo != null) {
+            try {
+                String playUrl = vodInfo.seriesMap.get(vodInfo.playFlag)
+                        .get(vodInfo.getplayIndex()).url;
+                if (playUrl != null && !playUrl.isEmpty()) {
+                    mVideoView.setUrl(playUrl);
+                    mVideoView.start();
+                    btnPlayPause.setImageResource(R.drawable.v_pause);
+                    handler.postDelayed(updateProgressRunnable, 500);
+                }
+            } catch (Throwable th) {
+                th.printStackTrace();
+            }
+        }
+    }
+
+    /**
      * 处理滑动手势(亮度/音量/进度)
      */
     private void handleGesture(MotionEvent event) {
@@ -188,12 +213,13 @@ public class MobilePlayActivity extends AppCompatActivity {
 
                 // 水平滑动:进度调节
                 if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+                    if (mVideoView == null) break;
                     int seekAmount = (int) (dx / screenWidth * 120000); // 最多 2 分钟
                     int newProgress = startProgress + seekAmount;
-                    int duration = mVideoView != null ? (int) mVideoView.getDuration() : 0;
+                    int duration = (int) mVideoView.getDuration();
                     newProgress = Math.max(0, Math.min(newProgress, duration));
                     showGestureHint(R.drawable.v_ffwd, formatTime(newProgress));
-                    if (mVideoView != null && !isSeeking) {
+                    if (!isSeeking) {
                         mVideoView.seekTo(newProgress);
                     }
                 }
@@ -278,6 +304,24 @@ public class MobilePlayActivity extends AppCompatActivity {
         gestureHint.setVisibility(View.GONE);
     }
 
+    /**
+     * 更新播放进度
+     */
+    private void updateProgress() {
+        if (mVideoView == null) return;
+        if (!isSeeking) {
+            int current = (int) mVideoView.getCurrentPosition();
+            int duration = (int) mVideoView.getDuration();
+            if (duration > 0) {
+                seekBar.setMax(duration);
+                seekBar.setProgress(current);
+                tvCurrentTime.setText(formatTime(current));
+                tvTotalTime.setText(formatTime(duration));
+            }
+        }
+        handler.postDelayed(updateProgressRunnable, 500);
+    }
+
     private int getCurrentBrightness() {
         try {
             return Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
@@ -317,9 +361,28 @@ public class MobilePlayActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (mVideoView != null) {
+            mVideoView.pause();
+        }
+        handler.removeCallbacks(updateProgressRunnable);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mVideoView != null && !isFinishing()) {
+            mVideoView.start();
+            handler.postDelayed(updateProgressRunnable, 500);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacks(hideControlBarRunnable);
+        handler.removeCallbacks(updateProgressRunnable);
         if (mVideoView != null) {
             mVideoView.release();
         }

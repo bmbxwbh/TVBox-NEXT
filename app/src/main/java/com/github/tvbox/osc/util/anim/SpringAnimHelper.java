@@ -28,6 +28,7 @@ public class SpringAnimHelper {
      * @param view 目标 View
      */
     public static void bindFocusScale(View view) {
+        if (view == null) return;
         view.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 scale(v, 1.1f, AnimInterpolator.FOCUS_SPRING);
@@ -88,13 +89,18 @@ public class SpringAnimHelper {
      * @param spring SpringForce 配置
      */
     public static void scale(View view, float scale, SpringForce spring) {
-        SpringAnimation scaleX = new SpringAnimation(view, SpringAnimation.SCALE_X, scale);
-        scaleX.setSpring(spring);
-        scaleX.start();
+        if (view == null || spring == null) return;
+        try {
+            SpringAnimation scaleX = new SpringAnimation(view, SpringAnimation.SCALE_X, scale);
+            scaleX.setSpring(spring);
+            scaleX.start();
 
-        SpringAnimation scaleY = new SpringAnimation(view, SpringAnimation.SCALE_Y, scale);
-        scaleY.setSpring(spring);
-        scaleY.start();
+            SpringAnimation scaleY = new SpringAnimation(view, SpringAnimation.SCALE_Y, scale);
+            scaleY.setSpring(spring);
+            scaleY.start();
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
     }
 
     /**
@@ -106,16 +112,21 @@ public class SpringAnimHelper {
      * @param stiffness 刚度
      */
     public static void translate(View view, float offsetX, float offsetY, float stiffness) {
-        SpringForce spring = new SpringForce()
-                .setStiffness(stiffness)
-                .setDampingRatio(SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY);
+        if (view == null) return;
+        try {
+            SpringForce spring = new SpringForce()
+                    .setStiffness(stiffness)
+                    .setDampingRatio(SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY);
 
-        SpringAnimation animX = new SpringAnimation(view, SpringAnimation.TRANSLATION_X, offsetX);
-        animX.setSpring(spring);
-        animX.start();
+            SpringAnimation animX = new SpringAnimation(view, SpringAnimation.TRANSLATION_X, offsetX);
+            animX.setSpring(spring);
+            animX.start();
 
-        SpringAnimation animY = new SpringAnimation(view, SpringAnimation.TRANSLATION_Y, offsetY);
-        animY.setSpring(spring);
-        animY.start();
+            SpringAnimation animY = new SpringAnimation(view, SpringAnimation.TRANSLATION_Y, offsetY);
+            animY.setSpring(spring);
+            animY.start();
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
     }
 }

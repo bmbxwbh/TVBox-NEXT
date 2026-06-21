@@ -181,9 +181,9 @@ public class MobileHomeFragment extends Fragment {
                 bundle.putString("sourceKey", vod.sourceKey);
                 if (vod.id.startsWith("msearch:")) {
                     bundle.putString("title", vod.name);
-                    jumpActivity(FastSearchActivity.class, bundle);
+                    startActivityFromFragment(FastSearchActivity.class, bundle);
                 } else {
-                    jumpActivity(DetailActivity.class, bundle);
+                    startActivityFromFragment(DetailActivity.class, bundle);
                 }
             } else {
                 Intent newIntent;
@@ -313,6 +313,7 @@ public class MobileHomeFragment extends Fragment {
      */
     private void updateHero(List<Movie.Video> list) {
         if (list == null || list.isEmpty()) return;
+        if (tvHeroTitle == null) return;  // 视图未初始化
         Movie.Video video = list.get(0);
         if (!TextUtils.isEmpty(video.pic)) {
             ImgUtil.load(video.pic, ivHeroBg, 0);
@@ -327,22 +328,23 @@ public class MobileHomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (hotAdapter == null) return;
         // 历史记录模式:每次返回时刷新
         if (Hawk.get(HawkConfig.HOME_REC, 0) == 2) {
             loadHistory();
         }
         // 站点推荐模式:如果 homeSourceRec 已更新,刷新列表
         if (Hawk.get(HawkConfig.HOME_REC, 0) == 1 && homeSourceRec != null
-                && (hotAdapter == null || hotAdapter.getData().isEmpty())) {
+                && hotAdapter.getData().isEmpty()) {
             hotAdapter.setNewData(homeSourceRec);
             updateHero(homeSourceRec);
         }
     }
 
     /**
-     * 跳转 Activity(复用原版 BaseLazyFragment.jumpActivity)
+     * 从 Fragment 启动 Activity(避免与 BaseActivity.jumpActivity 命名冲突)
      */
-    private void jumpActivity(Class<?> clazz, Bundle bundle) {
+    private void startActivityFromFragment(Class<?> clazz, Bundle bundle) {
         Intent intent = new Intent(getContext(), clazz);
         intent.putExtras(bundle);
         startActivity(intent);

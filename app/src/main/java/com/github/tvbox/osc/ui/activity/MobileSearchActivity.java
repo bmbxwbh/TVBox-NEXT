@@ -326,7 +326,7 @@ public class MobileSearchActivity extends BaseActivity {
 
         List<SourceBean> searchRequestList = new ArrayList<>();
 
-        boolean equals = this.sKey.equals("filter__home");
+        boolean equals = "filter__home".equals(this.sKey);
         if (equals) {
             SourceBean home = ApiConfig.get().getHomeSourceBean();
             if (home.isSearchable()) {

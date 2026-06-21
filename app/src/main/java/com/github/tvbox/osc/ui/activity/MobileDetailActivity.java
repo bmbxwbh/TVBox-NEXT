@@ -184,8 +184,10 @@ public class MobileDetailActivity extends BaseActivity {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                 if (position == -1) return;
+                if (vodInfo == null || position >= vodInfo.seriesFlags.size()) return;
                 String newFlag = seriesFlagAdapter.getData().get(position).name;
-                if (vodInfo != null && !vodInfo.playFlag.equals(newFlag)) {
+                if (newFlag == null) return;
+                if (vodInfo.playFlag == null || !vodInfo.playFlag.equals(newFlag)) {
                     for (int i = 0; i < vodInfo.seriesFlags.size(); i++) {
                         VodInfo.VodSeriesFlag flag = vodInfo.seriesFlags.get(i);
                         if (flag.name.equals(vodInfo.playFlag)) {
@@ -196,8 +198,11 @@ public class MobileDetailActivity extends BaseActivity {
                     }
                     VodInfo.VodSeriesFlag flag = vodInfo.seriesFlags.get(position);
                     flag.selected = true;
-                    if (vodInfo.seriesMap.get(vodInfo.playFlag).size() > vodInfo.getplayIndex()) {
-                        vodInfo.seriesMap.get(vodInfo.playFlag).get(vodInfo.playIndex).selected = false;
+                    if (vodInfo.playFlag != null && vodInfo.seriesMap.containsKey(vodInfo.playFlag)) {
+                        List<VodInfo.VodSeries> oldSeries = vodInfo.seriesMap.get(vodInfo.playFlag);
+                        if (oldSeries != null && oldSeries.size() > vodInfo.getplayIndex()) {
+                            oldSeries.get(vodInfo.playIndex).selected = false;
+                        }
                     }
                     vodInfo.playFlag = newFlag;
                     seriesFlagAdapter.notifyItemChanged(position);
@@ -357,41 +362,36 @@ public class MobileDetailActivity extends BaseActivity {
      */
     private void refreshList() {
         try {
-            if (vodInfo.seriesMap.get(vodInfo.playFlag).size() <= vodInfo.getplayIndex()) {
+            if (vodInfo == null || vodInfo.seriesMap == null || vodInfo.playFlag == null) {
+                return;
+            }
+            List<VodInfo.VodSeries> seriesList = vodInfo.seriesMap.get(vodInfo.playFlag);
+            if (seriesList == null || seriesList.isEmpty()) {
+                return;
+            }
+            if (seriesList.size() <= vodInfo.getplayIndex()) {
                 vodInfo.playIndex = 0;
             }
-            if (vodInfo.seriesMap.get(vodInfo.playFlag) != null) {
-                int playIndex = this.vodInfo.getplayIndex();
-                if (vodInfo.seriesMap.get(vodInfo.playFlag).size() >= playIndex) {
-                    vodInfo.seriesMap.get(vodInfo.playFlag).get(playIndex).selected = true;
-                } else {
-                    vodInfo.playGroup = 0;
-                }
-            }
-
-            List<VodInfo.VodSeries> list = vodInfo.seriesMap.get(vodInfo.playFlag);
-            int index = 0;
-            for (VodInfo.VodSeries vodSeries : list) {
-                index++;
-                if (TextUtils.isEmpty(vodSeries.name)) {
-                    if (list.size() == 1) {
-                        vodSeries.name = vodInfo.name;
-                    }
-                    if (TextUtils.isEmpty(vodSeries.name)) {
-                        vodSeries.name = "" + index;
-                    }
-                }
+            int playIndex = this.vodInfo.getplayIndex();
+            if (seriesList.size() > playIndex) {
+                seriesList.get(playIndex).selected = true;
+            } else {
+                vodInfo.playGroup = 0;
             }
 
             List<VodSeriesGroup> seriesGroupList = getSeriesGroupList();
             if (!seriesGroupList.isEmpty()) {
-                seriesGroupList.get(vodInfo.playGroup).selected = true;
+                if (vodInfo.playGroup < seriesGroupList.size()) {
+                    seriesGroupList.get(vodInfo.playGroup).selected = true;
+                }
                 seriesGroupAdapter.setNewData(seriesGroupList);
                 rvSeriesGroup.setVisibility(View.VISIBLE);
             } else {
                 rvSeriesGroup.setVisibility(View.GONE);
             }
-            seriesAdapter.setNewData(uu.get(vodInfo.playGroup));
+            if (vodInfo.playGroup < uu.size()) {
+                seriesAdapter.setNewData(uu.get(vodInfo.playGroup));
+            }
 
             rvEpisodes.postDelayed(new Runnable() {
                 @Override
@@ -417,7 +417,13 @@ public class MobileDetailActivity extends BaseActivity {
             uu = new ArrayList<>();
         }
         try {
+            if (vodInfo == null || vodInfo.seriesMap == null || vodInfo.playFlag == null) {
+                return arrayList;
+            }
             List<VodInfo.VodSeries> vodSeries = vodInfo.seriesMap.get(vodInfo.playFlag);
+            if (vodSeries == null || vodSeries.isEmpty()) {
+                return arrayList;
+            }
             int size = vodSeries.size();
             GroupCount = size > 2500.0d ? 300 : size > 1500.0d ? 200 : size > 1000.0d ? 150 : size > 500.0d ? 100 : size > 300.0d ? 50 : size > 100.0d ? 30 : 20;
             vodInfo.playGroupCount = GroupCount;
@@ -464,7 +470,10 @@ public class MobileDetailActivity extends BaseActivity {
      * 跳转播放(使用原版 PlayActivity)
      */
     private void jumpToPlay() {
-        if (vodInfo != null && vodInfo.seriesMap.get(vodInfo.playFlag).size() > 0) {
+        if (vodInfo == null || vodInfo.playFlag == null) return;
+        List<VodInfo.VodSeries> series = vodInfo.seriesMap.get(vodInfo.playFlag);
+        if (series == null || series.isEmpty()) return;
+        if (vodInfo.getplayIndex() < series.size()) {
             // 保存历史
             insertVod(firstsourceKey, vodInfo);
             Bundle bundle = new Bundle();
@@ -480,7 +489,12 @@ public class MobileDetailActivity extends BaseActivity {
      */
     private void insertVod(String sourceKey, VodInfo vodInfo) {
         try {
-            vodInfo.playNote = vodInfo.seriesMap.get(vodInfo.playFlag).get(vodInfo.getplayIndex()).name;
+            if (vodInfo.playFlag != null && vodInfo.seriesMap != null) {
+                List<VodInfo.VodSeries> series = vodInfo.seriesMap.get(vodInfo.playFlag);
+                if (series != null && vodInfo.getplayIndex() < series.size()) {
+                    vodInfo.playNote = series.get(vodInfo.getplayIndex()).name;
+                }
+            }
         } catch (Throwable th) {
             vodInfo.playNote = "";
         }
@@ -506,32 +520,39 @@ public class MobileDetailActivity extends BaseActivity {
         if (event.type == RefreshEvent.TYPE_REFRESH) {
             if (event.obj != null && event.obj instanceof Integer) {
                 int index = (int) event.obj;
+                if (GroupCount <= 0) return;
                 int mGroupIndex = (int) Math.floor(index / (GroupCount + 0.0f));
                 boolean changeGroup = false;
                 if (mGroupIndex != GroupIndex) {
                     changeGroup = true;
-                    if (vodInfo.playIndex < seriesAdapter.getData().size()) {
+                    if (vodInfo.playIndex >= 0 && vodInfo.playIndex < seriesAdapter.getData().size()) {
                         seriesAdapter.getData().get(vodInfo.playIndex).selected = false;
                         seriesAdapter.notifyItemChanged(vodInfo.playIndex);
                     }
-                    seriesGroupAdapter.getData().get(GroupIndex).selected = false;
-                    seriesGroupAdapter.notifyItemChanged(GroupIndex);
-                    seriesGroupAdapter.getData().get(mGroupIndex).selected = true;
-                    seriesGroupAdapter.notifyItemChanged(mGroupIndex);
-                    seriesAdapter.setNewData(uu.get(mGroupIndex));
+                    if (GroupIndex >= 0 && GroupIndex < seriesGroupAdapter.getData().size()) {
+                        seriesGroupAdapter.getData().get(GroupIndex).selected = false;
+                        seriesGroupAdapter.notifyItemChanged(GroupIndex);
+                    }
+                    if (mGroupIndex >= 0 && mGroupIndex < seriesGroupAdapter.getData().size()) {
+                        seriesGroupAdapter.getData().get(mGroupIndex).selected = true;
+                        seriesGroupAdapter.notifyItemChanged(mGroupIndex);
+                    }
+                    if (mGroupIndex >= 0 && mGroupIndex < uu.size()) {
+                        seriesAdapter.setNewData(uu.get(mGroupIndex));
+                    }
                     GroupIndex = mGroupIndex;
                     rvSeriesGroup.scrollToPosition(mGroupIndex);
                 }
                 if (index != vodInfo.getplayIndex()) {
                     if (!changeGroup) {
-                        if (vodInfo.playIndex < seriesAdapter.getData().size()) {
+                        if (vodInfo.playIndex >= 0 && vodInfo.playIndex < seriesAdapter.getData().size()) {
                             seriesAdapter.getData().get(vodInfo.playIndex).selected = false;
                             seriesAdapter.notifyItemChanged(vodInfo.playIndex);
                         }
                     }
                     vodInfo.playIndex = index % GroupCount;
                     vodInfo.playGroup = index / GroupCount;
-                    if (vodInfo.playIndex < seriesAdapter.getData().size()) {
+                    if (vodInfo.playIndex >= 0 && vodInfo.playIndex < seriesAdapter.getData().size()) {
                         seriesAdapter.getData().get(vodInfo.playIndex).selected = true;
                         seriesAdapter.notifyItemChanged(vodInfo.playIndex);
                     }
