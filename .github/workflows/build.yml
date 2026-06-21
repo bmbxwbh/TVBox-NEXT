@@ -1,0 +1,128 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: '发布类型'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '7.5'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Debug APK
+        if: github.event_name == 'push' || github.event.inputs.release_type == 'debug' || github.event.inputs.release_type == ''
+        run: |
+          ./gradlew assembleNormalDebug --build-cache --parallel --daemon --warning-mode summary || \
+          ./gradlew assembleDebug --build-cache --parallel --daemon --warning-mode summary
+
+      - name: Build Release APK
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_type == 'release'
+        run: |
+          ./gradlew assembleNormalRelease --build-cache --parallel --daemon --warning-mode summary || \
+          ./gradlew assembleRelease --build-cache --parallel --daemon --warning-mode summary
+
+      - name: Prepare APK
+        id: prepare
+        run: |
+          mkdir -p ${{ github.workspace }}/apk/
+          find . -name "*.apk" -type f | while read f; do
+            cp "$f" ${{ github.workspace }}/apk/
+          done
+          ls -la ${{ github.workspace }}/apk/
+          echo "apk_dir=${{ github.workspace }}/apk" >> $GITHUB_OUTPUT
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TVBox-NEXT-APK
+          path: ${{ github.workspace }}/apk/*.apk
+          retention-days: 30
+          compression-level: 0
+
+      - name: Generate release tag
+        id: tag
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          TAG="v$(date +'%Y%m%d%H%M%S')"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Generated tag: $TAG"
+
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: TVBox-NEXT ${{ steps.tag.outputs.tag }}
+          body: |
+            ## TVBox-NEXT 自动构建
+
+            **构建时间**: ${{ steps.tag.outputs.tag }}
+            **Commit**: ${{ github.sha }}
+            **分支**: ${{ github.ref_name }}
+
+            ### 下载说明
+            - `TVBox_debug-java-arm64.apk` - 64位 ARM 设备(主流手机/电视盒子)
+            - `TVBox_debug-java-armeabi.apk` - 32位 ARM 设备(老旧设备)
+
+            ### 功能
+            - Netflix 风格 UI 改造(TV + 手机端)
+            - Spring 物理动画 + 共享元素转场
+            - 海报库多数据源(TMDB/豆瓣/TVmaze)
+            - 完整保留原版 TVBox 功能逻辑
+          files: ${{ github.workspace }}/apk/*.apk
+          draft: false
+          prerelease: false
+          make_latest: true
+
+      - name: Create Tag Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          body: |
+            ## TVBox-NEXT ${{ github.ref_name }}
+
+            **Commit**: ${{ github.sha }}
+
+            ### 下载说明
+            - `TVBox_debug-java-arm64.apk` - 64位 ARM 设备(主流手机/电视盒子)
+            - `TVBox_debug-java-armeabi.apk` - 32位 ARM 设备(老旧设备)
+          files: ${{ github.workspace }}/apk/*.apk
+          draft: false
+          prerelease: false
+          make_latest: true
