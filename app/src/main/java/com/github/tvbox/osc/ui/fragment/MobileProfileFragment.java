@@ -21,6 +21,8 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.ui.activity.CollectActivity;
 import com.github.tvbox.osc.ui.activity.HistoryActivity;
+import com.github.tvbox.osc.ui.activity.LivePlayActivity;
+import com.github.tvbox.osc.ui.activity.PushActivity;
 import com.github.tvbox.osc.ui.activity.SettingActivity;
 
 import java.util.ArrayList;
@@ -49,10 +51,12 @@ public class MobileProfileFragment extends Fragment {
         rvProfileMenu.setLayoutManager(new LinearLayoutManager(getContext()));
         rvProfileMenu.setNestedScrollingEnabled(false);
 
-        // 构建菜单项
+        // 构建菜单项(对齐 TV 端 UserFragment 的 7 个入口)
         List<ProfileMenuItem> menuItems = new ArrayList<>();
         menuItems.add(new ProfileMenuItem("收藏", R.drawable.hm_fav, CollectActivity.class));
         menuItems.add(new ProfileMenuItem("历史", R.drawable.hm_history, HistoryActivity.class));
+        menuItems.add(new ProfileMenuItem("直播", R.drawable.hm_live, LivePlayActivity.class));
+        menuItems.add(new ProfileMenuItem("推送", R.drawable.hm_push, PushActivity.class));
         menuItems.add(new ProfileMenuItem("设置", R.drawable.hm_settings, SettingActivity.class));
         menuItems.add(new ProfileMenuItem("应用信息", R.drawable.icon_setting, null));
 
