@@ -137,6 +137,10 @@ public class HomeActivity extends BaseActivity {
 
     // takagen99: Added to allow read string
     public static Resources getRes() {
+        // TVBOX-NEXT: 手机端 HomeActivity 未启动时 res 为 null,回退到 Application 的 Resources
+        if (res == null) {
+            return App.getInstance().getResources();
+        }
         return res;
     }
 
