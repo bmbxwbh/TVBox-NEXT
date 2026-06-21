@@ -58,7 +58,7 @@ jobs:
 
       - name: Build Release APK
         run: |
-          ./gradlew assembleNormalRelease --build-cache --parallel --daemon --warning-mode summary 2>&1 | tee build.log
+          ./gradlew assembleArm64GenericNormalRelease assembleArmeabiGenericNormalRelease --build-cache --parallel --daemon --warning-mode summary 2>&1 | tee build.log
           exit ${PIPESTATUS[0]}
         env:
           KEYSTORE_FILE: ${{ github.workspace }}/app/keystore.jks
