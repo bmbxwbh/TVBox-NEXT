@@ -3,6 +3,7 @@ plugins {
 }
 
 android {
+    namespace 'com.whl.quickjs.android'
     compileSdk 34
 
     defaultConfig {
