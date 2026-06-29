@@ -174,12 +174,24 @@ public class MobileHomeFragment extends Fragment {
         rvHotList = rowView.findViewById(R.id.rvRow);
 
         // 设置行标题
+        int homeRec = Hawk.get(HawkConfig.HOME_REC, 0);
+        // 修复: 站点推荐模式但无源时回退到豆瓣模式,标题也需一致
+        if (homeRec == 1) {
+            try {
+                List<com.github.tvbox.osc.bean.SourceBean> sources = ApiConfig.get().getSourceBeanList();
+                if (sources == null || sources.isEmpty()) {
+                    homeRec = 0;
+                }
+            } catch (Throwable th) {
+                homeRec = 0;
+            }
+        }
         String tvRate = "";
-        if (Hawk.get(HawkConfig.HOME_REC, 0) == 0) {
+        if (homeRec == 0) {
             tvRate = "豆瓣热播";
-        } else if (Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
+        } else if (homeRec == 1) {
             tvRate = homeSourceRec != null ? "站点推荐" : "豆瓣热播";
-        } else if (Hawk.get(HawkConfig.HOME_REC, 0) == 2) {
+        } else if (homeRec == 2) {
             tvRate = "历史记录";
         }
         tvRowTitle.setText(tvRate);
@@ -194,8 +206,13 @@ public class MobileHomeFragment extends Fragment {
 
         // 点击事件(复用原版 UserFragment 的点击逻辑)
         hotAdapter.setOnItemClickListener((adapter, view1, position) -> {
-            if (ApiConfig.get().getSourceBeanList().isEmpty())
+            // 修复闪退: ApiConfig 可能未初始化或 getSourceBeanList 返回 null
+            try {
+                if (ApiConfig.get() == null || ApiConfig.get().getSourceBeanList() == null || ApiConfig.get().getSourceBeanList().isEmpty())
+                    return;
+            } catch (Throwable th) {
                 return;
+            }
             Movie.Video vod = (Movie.Video) adapter.getItem(position);
             if (vod.id != null && !vod.id.isEmpty()) {
                 Bundle bundle = new Bundle();
@@ -228,7 +245,21 @@ public class MobileHomeFragment extends Fragment {
      * 加载首页推荐数据
      */
     private void initHomeHotVod() {
-        if (Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
+        int homeRec = Hawk.get(HawkConfig.HOME_REC, 0);
+
+        // 修复闪退: 站点推荐模式但 ApiConfig 未初始化或无源,回退到豆瓣模式
+        if (homeRec == 1) {
+            try {
+                List<com.github.tvbox.osc.bean.SourceBean> sources = ApiConfig.get().getSourceBeanList();
+                if (sources == null || sources.isEmpty()) {
+                    homeRec = 0; // 回退到豆瓣模式
+                }
+            } catch (Throwable th) {
+                homeRec = 0; // 回退到豆瓣模式
+            }
+        }
+
+        if (homeRec == 1) {
             // 站点推荐模式
             if (homeSourceRec != null) {
                 hideLoading();
@@ -239,7 +270,7 @@ public class MobileHomeFragment extends Fragment {
                 showLoading();
             }
             return;
-        } else if (Hawk.get(HawkConfig.HOME_REC, 0) == 2) {
+        } else if (homeRec == 2) {
             // 历史记录模式
             loadHistory();
             return;

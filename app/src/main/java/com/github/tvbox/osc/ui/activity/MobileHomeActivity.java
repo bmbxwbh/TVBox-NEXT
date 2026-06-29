@@ -188,7 +188,8 @@ public class MobileHomeActivity extends BaseMobileActivity {
                     @Override
                     public void run() {
                         if (dialog == null)
-                            dialog = new TipDialog(MobileHomeActivity.this, msg, getString(R.string.hm_retry), getString(R.string.hm_cancel), new TipDialog.OnListener() {
+                            // 修复闪退: msg 可能为 null, TipDialog.setText 不接受 null
+                            dialog = new TipDialog(MobileHomeActivity.this, msg != null ? msg : "配置加载失败", getString(R.string.hm_retry), getString(R.string.hm_cancel), new TipDialog.OnListener() {
                                 @Override
                                 public void left() {
                                     mMobileHandler.post(new Runnable() {
