@@ -1,6 +1,7 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <!-- 修复闪退: MaterialCardView/BottomNavigationView 要求 Theme.MaterialComponents -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/color_32364E</item>
         <item name="colorPrimaryDark">@color/color_32364E_40</item>
