@@ -47,40 +47,47 @@ public class MobileHomeActivity extends BaseMobileActivity {
 
     @Override
     protected void init() {
-        viewPager = findViewById(R.id.viewPager);
-        bottomNav = findViewById(R.id.bottomNav);
+        try {
+            viewPager = findViewById(R.id.viewPager);
+            bottomNav = findViewById(R.id.bottomNav);
 
-        // 禁用左右滑动切换(通过底部导航切换)
-        viewPager.setUserInputEnabled(false);
+            // 禁用左右滑动切换(通过底部导航切换)
+            viewPager.setUserInputEnabled(false);
 
-        // 设置 ViewPager2 适配器
-        viewPager.setAdapter(new MobilePagerAdapter(this));
-        viewPager.setOffscreenPageLimit(3);
+            // 设置 ViewPager2 适配器
+            viewPager.setAdapter(new MobilePagerAdapter(this));
+            viewPager.setOffscreenPageLimit(3);
 
-        // 底部导航点击切换 Fragment
-        bottomNav.setOnItemSelectedListener((NavigationBarView.OnItemSelectedListener) item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.nav_home) {
-                viewPager.setCurrentItem(0, false);
-            } else if (itemId == R.id.nav_search) {
-                viewPager.setCurrentItem(1, false);
-            } else if (itemId == R.id.nav_downloads) {
-                viewPager.setCurrentItem(2, false);
-            } else if (itemId == R.id.nav_profile) {
-                viewPager.setCurrentItem(3, false);
+            // 底部导航点击切换 Fragment
+            bottomNav.setOnItemSelectedListener((NavigationBarView.OnItemSelectedListener) item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home) {
+                    viewPager.setCurrentItem(0, false);
+                } else if (itemId == R.id.nav_search) {
+                    viewPager.setCurrentItem(1, false);
+                } else if (itemId == R.id.nav_downloads) {
+                    viewPager.setCurrentItem(2, false);
+                } else if (itemId == R.id.nav_profile) {
+                    viewPager.setCurrentItem(3, false);
+                }
+                return true;
+            });
+
+            // 复用原版 HomeActivity 的初始化逻辑
+            initViewModel();
+            useCacheConfig = false;
+            Intent intent = getIntent();
+            if (intent != null && intent.getExtras() != null) {
+                Bundle bundle = intent.getExtras();
+                useCacheConfig = bundle.getBoolean("useCache", false);
             }
-            return true;
-        });
-
-        // 复用原版 HomeActivity 的初始化逻辑
-        initViewModel();
-        useCacheConfig = false;
-        Intent intent = getIntent();
-        if (intent != null && intent.getExtras() != null) {
-            Bundle bundle = intent.getExtras();
-            useCacheConfig = bundle.getBoolean("useCache", false);
+            initData();
+        } catch (Throwable th) {
+            th.printStackTrace();
+            // 初始化失败时记录崩溃日志,避免直接闪退
+            com.github.tvbox.osc.util.LOG.e("MobileHomeActivity", "init failed: " + th.getMessage());
+            android.widget.Toast.makeText(this, "初始化失败: " + th.getMessage(), android.widget.Toast.LENGTH_LONG).show();
         }
-        initData();
     }
 
     /**

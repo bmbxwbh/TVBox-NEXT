@@ -66,6 +66,8 @@ public class App extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        // TVBOX-NEXT: 初始化崩溃日志捕获(必须在所有其他初始化之前)
+        com.github.tvbox.osc.util.CrashHandler.init();
         // TVBOX-NEXT: 初始化设备类型
         IS_TV = com.github.tvbox.osc.util.DeviceTypeDetector.isTelevision(this);
         IS_MOBILE = com.github.tvbox.osc.util.DeviceTypeDetector.isMobile(this);

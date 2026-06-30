@@ -139,7 +139,23 @@ public class ApiConfig {
 
     public void loadConfig(boolean useCache, LoadConfigCallback callback, Activity activity) {
         // Embedded Source : Update in Strings.xml if required
-        String apiUrl = Hawk.get(HawkConfig.API_URL, HomeActivity.getRes().getString(R.string.app_source));
+        // 修复闪退: 手机端 HomeActivity 未启动,getRes() 可能返回 null 时回退到 App 资源
+        String defaultApiUrl = "";
+        try {
+            android.content.res.Resources res = HomeActivity.getRes();
+            if (res != null) {
+                defaultApiUrl = res.getString(R.string.app_source);
+            } else {
+                defaultApiUrl = App.getInstance().getString(R.string.app_source);
+            }
+        } catch (Throwable th) {
+            try {
+                defaultApiUrl = App.getInstance().getString(R.string.app_source);
+            } catch (Throwable th2) {
+                defaultApiUrl = "";
+            }
+        }
+        String apiUrl = Hawk.get(HawkConfig.API_URL, defaultApiUrl);
         if (apiUrl.isEmpty()) {
             callback.error("源地址为空");
             return;

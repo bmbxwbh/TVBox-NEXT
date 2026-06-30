@@ -26,6 +26,7 @@ import com.github.tvbox.osc.bean.VodInfo;
 import com.github.tvbox.osc.cache.RoomDataManger;
 import com.github.tvbox.osc.ui.activity.DetailActivity;
 import com.github.tvbox.osc.ui.activity.FastSearchActivity;
+import com.github.tvbox.osc.ui.activity.MobileDetailActivity;
 import com.github.tvbox.osc.ui.activity.MobileSearchActivity;
 import com.github.tvbox.osc.ui.activity.SettingActivity;
 import com.github.tvbox.osc.ui.adapter.MobileGridAdapter;
@@ -86,81 +87,108 @@ public class MobileHomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ivHeroBg = view.findViewById(R.id.ivHeroBg);
-        tvHeroTitle = view.findViewById(R.id.tvHeroTitle);
-        tvHeroYear = view.findViewById(R.id.tvHeroYear);
-        tvHeroType = view.findViewById(R.id.tvHeroType);
-        tvHeroRate = view.findViewById(R.id.tvHeroRate);
-        tvHeroDesc = view.findViewById(R.id.tvHeroDesc);
-        rowsContainer = view.findViewById(R.id.rowsContainer);
-        emptyState = view.findViewById(R.id.emptyState);
-        tvEmptyHint = view.findViewById(R.id.tvEmptyHint);
-        // TVBOX-NEXT 优化#5: 初始化加载状态进度条
-        loadingBar = view.findViewById(R.id.loadingBar);
+        try {
+            ivHeroBg = view.findViewById(R.id.ivHeroBg);
+            tvHeroTitle = view.findViewById(R.id.tvHeroTitle);
+            tvHeroYear = view.findViewById(R.id.tvHeroYear);
+            tvHeroType = view.findViewById(R.id.tvHeroType);
+            tvHeroRate = view.findViewById(R.id.tvHeroRate);
+            tvHeroDesc = view.findViewById(R.id.tvHeroDesc);
+            rowsContainer = view.findViewById(R.id.rowsContainer);
+            emptyState = view.findViewById(R.id.emptyState);
+            tvEmptyHint = view.findViewById(R.id.tvEmptyHint);
+            // TVBOX-NEXT 优化#5: 初始化加载状态进度条
+            loadingBar = view.findViewById(R.id.loadingBar);
 
-        // "去设置"按钮
-        View btnGoSetting = view.findViewById(R.id.btnGoSetting);
-        btnGoSetting.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), SettingActivity.class);
-            startActivity(intent);
-        });
-
-        // Hero 按钮触摸动画
-        View btnPlay = view.findViewById(R.id.btnHeroPlay);
-        View btnFav = view.findViewById(R.id.btnHeroFav);
-        btnPlay.setOnTouchListener((v, event) -> {
-            switch (event.getAction()) {
-                case android.view.MotionEvent.ACTION_DOWN:
-                    SpringAnimHelper.touchPress(v);
-                    break;
-                case android.view.MotionEvent.ACTION_UP:
-                case android.view.MotionEvent.ACTION_CANCEL:
-                    SpringAnimHelper.touchRelease(v);
-                    break;
-            }
-            return false;
-        });
-        btnFav.setOnTouchListener((v, event) -> {
-            switch (event.getAction()) {
-                case android.view.MotionEvent.ACTION_DOWN:
-                    SpringAnimHelper.touchPress(v);
-                    break;
-                case android.view.MotionEvent.ACTION_UP:
-                case android.view.MotionEvent.ACTION_CANCEL:
-                    SpringAnimHelper.touchRelease(v);
-                    break;
-            }
-            return false;
-        });
-
-        // 初始化横向滚动行(复用原版 UserFragment 的列表逻辑)
-        initHotList(view);
-
-        // 观察站点推荐数据(复用原版 HomeActivity 的 sortResult 观察)
-        if (getActivity() != null) {
-            SourceViewModel sourceViewModel = new ViewModelProvider(getActivity()).get(SourceViewModel.class);
-            sourceViewModel.sortResult.observe(getViewLifecycleOwner(), new Observer<AbsSortXml>() {
-                @Override
-                public void onChanged(AbsSortXml absXml) {
-                    if (absXml != null && absXml.videoList != null && absXml.videoList.size() > 0) {
-                        homeSourceRec = absXml.videoList;
-                        // 站点推荐模式:刷新列表
-                        if (Hawk.get(HawkConfig.HOME_REC, 0) == 1 && hotAdapter != null) {
-                            hideLoading();
-                            hideEmptyState();
-                            // TVBOX-NEXT 优化#6: 使用 DiffUtil 增量更新
-                            hotAdapter.setDiffNewData(homeSourceRec);
-                            updateHero(homeSourceRec);
-                        }
-                    } else if (Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
-                        showEmptyState("站点推荐数据为空,请检查源配置");
+            // "去设置"按钮
+            View btnGoSetting = view.findViewById(R.id.btnGoSetting);
+            if (btnGoSetting != null) {
+                btnGoSetting.setOnClickListener(v -> {
+                    try {
+                        Intent intent = new Intent(getContext(), SettingActivity.class);
+                        startActivity(intent);
+                    } catch (Throwable th) {
+                        th.printStackTrace();
                     }
-                }
-            });
-        }
+                });
+            }
 
-        // 加载首页推荐数据(复用原版 UserFragment.initHomeHotVod)
-        initHomeHotVod();
+            // Hero 按钮触摸动画
+            View btnPlay = view.findViewById(R.id.btnHeroPlay);
+            View btnFav = view.findViewById(R.id.btnHeroFav);
+            if (btnPlay != null) {
+                btnPlay.setOnTouchListener((v, event) -> {
+                    try {
+                        switch (event.getAction()) {
+                            case android.view.MotionEvent.ACTION_DOWN:
+                                SpringAnimHelper.touchPress(v);
+                                break;
+                            case android.view.MotionEvent.ACTION_UP:
+                            case android.view.MotionEvent.ACTION_CANCEL:
+                                SpringAnimHelper.touchRelease(v);
+                                break;
+                        }
+                    } catch (Throwable th) {
+                        th.printStackTrace();
+                    }
+                    return false;
+                });
+            }
+            if (btnFav != null) {
+                btnFav.setOnTouchListener((v, event) -> {
+                    try {
+                        switch (event.getAction()) {
+                            case android.view.MotionEvent.ACTION_DOWN:
+                                SpringAnimHelper.touchPress(v);
+                                break;
+                            case android.view.MotionEvent.ACTION_UP:
+                            case android.view.MotionEvent.ACTION_CANCEL:
+                                SpringAnimHelper.touchRelease(v);
+                                break;
+                        }
+                    } catch (Throwable th) {
+                        th.printStackTrace();
+                    }
+                    return false;
+                });
+            }
+
+            // 初始化横向滚动行(复用原版 UserFragment 的列表逻辑)
+            initHotList(view);
+
+            // 观察站点推荐数据(复用原版 HomeActivity 的 sortResult 观察)
+            if (getActivity() != null) {
+                SourceViewModel sourceViewModel = new ViewModelProvider(getActivity()).get(SourceViewModel.class);
+                sourceViewModel.sortResult.observe(getViewLifecycleOwner(), new Observer<AbsSortXml>() {
+                    @Override
+                    public void onChanged(AbsSortXml absXml) {
+                        try {
+                            if (absXml != null && absXml.videoList != null && absXml.videoList.size() > 0) {
+                                homeSourceRec = absXml.videoList;
+                                // 站点推荐模式:刷新列表
+                                if (Hawk.get(HawkConfig.HOME_REC, 0) == 1 && hotAdapter != null) {
+                                    hideLoading();
+                                    hideEmptyState();
+                                    // TVBOX-NEXT 优化#6: 使用 DiffUtil 增量更新
+                                    hotAdapter.setDiffNewData(homeSourceRec);
+                                    updateHero(homeSourceRec);
+                                }
+                            } else if (Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
+                                showEmptyState("站点推荐数据为空,请检查源配置");
+                            }
+                        } catch (Throwable th) {
+                            th.printStackTrace();
+                        }
+                    }
+                });
+            }
+
+            // 加载首页推荐数据(复用原版 UserFragment.initHomeHotVod)
+            initHomeHotVod();
+        } catch (Throwable th) {
+            th.printStackTrace();
+            com.github.tvbox.osc.util.LOG.e("MobileHomeFragment", "onViewCreated failed: " + th.getMessage());
+        }
     }
 
     /**
@@ -236,10 +264,17 @@ public class MobileHomeFragment extends Fragment {
                 bundle.putString("title", vod.name);
                 startActivityFromFragment(FastSearchActivity.class, bundle);
             } else {
+                // 修复闪退: 手机端应跳转 MobileDetailActivity 而不是 TV 端 DetailActivity
                 Bundle bundle = new Bundle();
                 bundle.putString("id", vod.id);
                 bundle.putString("sourceKey", vod.sourceKey);
-                startActivityFromFragment(DetailActivity.class, bundle);
+                try {
+                    startActivityFromFragment(MobileDetailActivity.class, bundle);
+                } catch (Throwable th) {
+                    // 回退到 TV 端 DetailActivity
+                    th.printStackTrace();
+                    startActivityFromFragment(DetailActivity.class, bundle);
+                }
             }
         });
 
