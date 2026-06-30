@@ -174,6 +174,12 @@ public class PlayActivity extends BaseActivity {
         return R.layout.activity_play;
     }
 
+    // 播放页面强制横屏
+    @Override
+    protected boolean isForceLandscape() {
+        return true;
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void refresh(RefreshEvent event) {
         if (event.type == RefreshEvent.TYPE_SUBTITLE_SIZE_CHANGE) {

@@ -2,6 +2,7 @@ package com.github.tvbox.osc.base;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -101,6 +102,8 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
         super.onCreate(savedInstanceState);
         setContentView(getLayoutResID());
         mContext = this;
+        // TVBOX-NEXT: 手机端强制竖屏,TV端强制横屏
+        applyDeviceOrientation();
         CutoutUtil.adaptCutoutAboveAndroidP(mContext, true);//设置刘海
         AppManager.getInstance().addActivity(this);
         init();
@@ -205,6 +208,31 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
     protected abstract int getLayoutResID();
 
     protected abstract void init();
+
+    /**
+     * TVBOX-NEXT: 根据设备类型设置屏幕方向
+     * TV端:横屏  手机端:竖屏  播放页面可覆写 isForceLandscape() 返回 true 保持横屏
+     */
+    private void applyDeviceOrientation() {
+        try {
+            if (isForceLandscape()) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+            } else if (App.IS_MOBILE || App.IS_TABLET) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            } else {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+            }
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+    }
+
+    /**
+     * 子类可覆写此方法返回 true 以强制横屏(如视频播放页)
+     */
+    protected boolean isForceLandscape() {
+        return false;
+    }
 
     protected void setLoadSir(View view) {
         if (mLoadService == null) {

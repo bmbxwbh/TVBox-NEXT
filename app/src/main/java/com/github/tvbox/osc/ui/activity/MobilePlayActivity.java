@@ -77,6 +77,12 @@ public class MobilePlayActivity extends BaseMobileActivity {
         return R.layout.activity_mobile_play;
     }
 
+    // 播放页面强制横屏
+    @Override
+    protected boolean isForceLandscape() {
+        return true;
+    }
+
     @Override
     protected void init() {
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);

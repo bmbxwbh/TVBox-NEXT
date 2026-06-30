@@ -214,6 +214,12 @@ public class LivePlayActivity extends BaseActivity {
         return R.layout.activity_live_play;
     }
 
+    // 直播页面强制横屏
+    @Override
+    protected boolean isForceLandscape() {
+        return true;
+    }
+
     @Override
     protected void init() {
 
