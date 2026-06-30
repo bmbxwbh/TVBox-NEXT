@@ -157,22 +157,26 @@ public class MobileDetailActivity extends BaseMobileActivity {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                 FastClickCheckUtil.check(view);
-                if (vodInfo != null && vodInfo.seriesMap.get(vodInfo.playFlag).size() > 0) {
-                    boolean reload = false;
-                    if (vodInfo.getplayIndex() != GroupIndex * GroupCount + position) {
-                        for (int i = 0; i < seriesAdapter.getData().size(); i++) {
-                            VodInfo.VodSeries Series = seriesAdapter.getData().get(i);
-                            Series.selected = false;
-                            seriesAdapter.notifyItemChanged(i);
-                        }
+                // 修复闪退: 完整检查 vodInfo/seriesMap/series 数据有效性
+                if (vodInfo == null || vodInfo.seriesMap == null || vodInfo.playFlag == null) return;
+                List<VodInfo.VodSeries> series = vodInfo.seriesMap.get(vodInfo.playFlag);
+                if (series == null || series.isEmpty() || position >= series.size()) return;
+                boolean reload = false;
+                if (vodInfo.getplayIndex() != GroupIndex * GroupCount + position) {
+                    for (int i = 0; i < seriesAdapter.getData().size(); i++) {
+                        VodInfo.VodSeries Series = seriesAdapter.getData().get(i);
+                        Series.selected = false;
+                        seriesAdapter.notifyItemChanged(i);
+                    }
+                    if (position < seriesAdapter.getData().size()) {
                         seriesAdapter.getData().get(position).selected = true;
                         seriesAdapter.notifyItemChanged(position);
-                        vodInfo.playIndex = position;
-                        vodInfo.playGroup = GroupIndex;
-                        reload = true;
                     }
-                    if (reload) jumpToPlay();
+                    vodInfo.playIndex = position;
+                    vodInfo.playGroup = GroupIndex;
+                    reload = true;
                 }
+                if (reload) jumpToPlay();
             }
         });
 
@@ -587,6 +591,8 @@ public class MobileDetailActivity extends BaseMobileActivity {
 
     private void bindTouchAnimation(int viewId) {
         View view = findViewById(viewId);
+        // 修复闪退: view 可能为 null(布局中不存在该 ID)
+        if (view == null) return;
         view.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case android.view.MotionEvent.ACTION_DOWN:

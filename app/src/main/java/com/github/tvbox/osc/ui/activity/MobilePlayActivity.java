@@ -253,13 +253,19 @@ public class MobilePlayActivity extends BaseMobileActivity {
 
         if (vodInfo != null) {
             try {
-                String playUrl = vodInfo.seriesMap.get(vodInfo.playFlag)
-                        .get(vodInfo.getplayIndex()).url;
-                if (playUrl != null && !playUrl.isEmpty()) {
-                    mVideoView.setUrl(playUrl);
-                    mVideoView.start();
-                    btnPlayPause.setImageResource(R.drawable.v_pause);
-                    mMobileHandler.postDelayed(updateProgressRunnable, 500);
+                if (vodInfo.seriesMap != null && vodInfo.playFlag != null
+                        && vodInfo.seriesMap.containsKey(vodInfo.playFlag)) {
+                    List<VodInfo.VodSeries> series = vodInfo.seriesMap.get(vodInfo.playFlag);
+                    if (series != null && !series.isEmpty()
+                            && vodInfo.getplayIndex() >= 0 && vodInfo.getplayIndex() < series.size()) {
+                        String playUrl = series.get(vodInfo.getplayIndex()).url;
+                        if (playUrl != null && !playUrl.isEmpty()) {
+                            mVideoView.setUrl(playUrl);
+                            mVideoView.start();
+                            btnPlayPause.setImageResource(R.drawable.v_pause);
+                            mMobileHandler.postDelayed(updateProgressRunnable, 500);
+                        }
+                    }
                 }
             } catch (Throwable th) {
                 th.printStackTrace();

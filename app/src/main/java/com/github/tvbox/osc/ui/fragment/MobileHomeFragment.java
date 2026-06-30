@@ -206,34 +206,40 @@ public class MobileHomeFragment extends Fragment {
 
         // 点击事件(复用原版 UserFragment 的点击逻辑)
         hotAdapter.setOnItemClickListener((adapter, view1, position) -> {
-            // 修复闪退: ApiConfig 可能未初始化或 getSourceBeanList 返回 null
-            try {
-                if (ApiConfig.get() == null || ApiConfig.get().getSourceBeanList() == null || ApiConfig.get().getSourceBeanList().isEmpty())
-                    return;
-            } catch (Throwable th) {
-                return;
-            }
             Movie.Video vod = (Movie.Video) adapter.getItem(position);
-            if (vod.id != null && !vod.id.isEmpty()) {
-                Bundle bundle = new Bundle();
-                bundle.putString("id", vod.id);
-                bundle.putString("sourceKey", vod.sourceKey);
-                if (vod.id.startsWith("msearch:")) {
-                    bundle.putString("title", vod.name);
-                    startActivityFromFragment(FastSearchActivity.class, bundle);
-                } else {
-                    startActivityFromFragment(DetailActivity.class, bundle);
-                }
-            } else {
+            if (vod == null) return;
+
+            // 修复闪退: 豆瓣数据没有 id 和 sourceKey,跳转搜索页
+            if (vod.id == null || vod.id.isEmpty() || vod.sourceKey == null || vod.sourceKey.isEmpty()) {
                 Intent newIntent;
                 if (Hawk.get(HawkConfig.FAST_SEARCH_MODE, false)) {
                     newIntent = new Intent(getContext(), FastSearchActivity.class);
                 } else {
                     newIntent = new Intent(getContext(), MobileSearchActivity.class);
                 }
-                newIntent.putExtra("title", vod.name);
-                newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                newIntent.putExtra("title", vod.name != null ? vod.name : "");
                 startActivity(newIntent);
+                return;
+            }
+
+            // 站点数据: 有完整 id 和 sourceKey,跳转详情页
+            try {
+                if (ApiConfig.get() == null || ApiConfig.get().getSourceBeanList() == null || ApiConfig.get().getSourceBeanList().isEmpty())
+                    return;
+            } catch (Throwable th) {
+                return;
+            }
+            if (vod.id.startsWith("msearch:")) {
+                Bundle bundle = new Bundle();
+                bundle.putString("id", vod.id);
+                bundle.putString("sourceKey", vod.sourceKey);
+                bundle.putString("title", vod.name);
+                startActivityFromFragment(FastSearchActivity.class, bundle);
+            } else {
+                Bundle bundle = new Bundle();
+                bundle.putString("id", vod.id);
+                bundle.putString("sourceKey", vod.sourceKey);
+                startActivityFromFragment(DetailActivity.class, bundle);
             }
         });
 
@@ -306,6 +312,13 @@ public class MobileHomeFragment extends Fragment {
                 @Override
                 public void onSuccess(Response<String> response) {
                     String netJson = response.body();
+                    // 修复闪退: response.body() 可能为 null
+                    if (netJson == null || netJson.isEmpty()) {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> showEmptyState("豆瓣数据为空,请检查网络"));
+                        }
+                        return;
+                    }
                     Hawk.put("home_hot_day", today);
                     Hawk.put("home_hot", netJson);
                     if (getActivity() != null) {
@@ -336,7 +349,10 @@ public class MobileHomeFragment extends Fragment {
 
                 @Override
                 public String convertResponse(okhttp3.Response response) throws Throwable {
-                    return response.body().string();
+                    // 修复闪退: response.body() 可能为 null
+                    okhttp3.ResponseBody body = response.body();
+                    if (body == null) return null;
+                    return body.string();
                 }
             });
         } catch (Throwable th) {
